@@ -1,0 +1,65 @@
+{
+  "manifest_version": "0.1.0-prototype.1",
+  "game": "12-moons",
+  "cards": [
+    {"id":"m01_pine_january_crane","month":1,"flower":"pine","base_class":"bright","display_name":"Pine Crane","tags":["bright"]},
+    {"id":"m01_pine_january_poetry_ribbon","month":1,"flower":"pine","base_class":"ribbon","display_name":"Pine Poetry Ribbon","tags":["poetry_ribbon","red_ribbon"]},
+    {"id":"m01_pine_january_chaff_a","month":1,"flower":"pine","base_class":"chaff","display_name":"Pine Chaff A","tags":["chaff"]},
+    {"id":"m01_pine_january_chaff_b","month":1,"flower":"pine","base_class":"chaff","display_name":"Pine Chaff B","tags":["chaff"]},
+
+    {"id":"m02_plum_february_uguisu","month":2,"flower":"plum","base_class":"animal","display_name":"Plum Bush Warbler","tags":["animal"]},
+    {"id":"m02_plum_february_poetry_ribbon","month":2,"flower":"plum","base_class":"ribbon","display_name":"Plum Poetry Ribbon","tags":["poetry_ribbon","red_ribbon"]},
+    {"id":"m02_plum_february_chaff_a","month":2,"flower":"plum","base_class":"chaff","display_name":"Plum Chaff A","tags":["chaff"]},
+    {"id":"m02_plum_february_chaff_b","month":2,"flower":"plum","base_class":"chaff","display_name":"Plum Chaff B","tags":["chaff"]},
+
+    {"id":"m03_cherry_march_curtain","month":3,"flower":"cherry","base_class":"bright","display_name":"Cherry Curtain","tags":["bright"]},
+    {"id":"m03_cherry_march_poetry_ribbon","month":3,"flower":"cherry","base_class":"ribbon","display_name":"Cherry Poetry Ribbon","tags":["poetry_ribbon","red_ribbon"]},
+    {"id":"m03_cherry_march_chaff_a","month":3,"flower":"cherry","base_class":"chaff","display_name":"Cherry Chaff A","tags":["chaff"]},
+    {"id":"m03_cherry_march_chaff_b","month":3,"flower":"cherry","base_class":"chaff","display_name":"Cherry Chaff B","tags":["chaff"]},
+
+    {"id":"m04_wisteria_april_cuckoo","month":4,"flower":"wisteria","base_class":"animal","display_name":"Wisteria Cuckoo","tags":["animal"]},
+    {"id":"m04_wisteria_april_ribbon","month":4,"flower":"wisteria","base_class":"ribbon","display_name":"Wisteria Ribbon","tags":["red_ribbon"]},
+    {"id":"m04_wisteria_april_chaff_a","month":4,"flower":"wisteria","base_class":"chaff","display_name":"Wisteria Chaff A","tags":["chaff"]},
+    {"id":"m04_wisteria_april_chaff_b","month":4,"flower":"wisteria","base_class":"chaff","display_name":"Wisteria Chaff B","tags":["chaff"]},
+
+    {"id":"m05_iris_may_eight_plank_bridge","month":5,"flower":"iris","base_class":"animal","display_name":"Iris Eight-Plank Bridge","tags":["animal"]},
+    {"id":"m05_iris_may_ribbon","month":5,"flower":"iris","base_class":"ribbon","display_name":"Iris Ribbon","tags":["red_ribbon"]},
+    {"id":"m05_iris_may_chaff_a","month":5,"flower":"iris","base_class":"chaff","display_name":"Iris Chaff A","tags":["chaff"]},
+    {"id":"m05_iris_may_chaff_b","month":5,"flower":"iris","base_class":"chaff","display_name":"Iris Chaff B","tags":["chaff"]},
+
+    {"id":"m06_peony_june_butterfly","month":6,"flower":"peony","base_class":"animal","display_name":"Peony Butterfly","tags":["animal","butterfly"]},
+    {"id":"m06_peony_june_blue_ribbon","month":6,"flower":"peony","base_class":"ribbon","display_name":"Peony Blue Ribbon","tags":["blue_ribbon"]},
+    {"id":"m06_peony_june_chaff_a","month":6,"flower":"peony","base_class":"chaff","display_name":"Peony Chaff A","tags":["chaff"]},
+    {"id":"m06_peony_june_chaff_b","month":6,"flower":"peony","base_class":"chaff","display_name":"Peony Chaff B","tags":["chaff"]},
+
+    {"id":"m07_clover_july_boar","month":7,"flower":"clover","base_class":"animal","display_name":"Clover Boar","tags":["animal","boar"]},
+    {"id":"m07_clover_july_ribbon","month":7,"flower":"clover","base_class":"ribbon","display_name":"Clover Ribbon","tags":["red_ribbon"]},
+    {"id":"m07_clover_july_chaff_a","month":7,"flower":"clover","base_class":"chaff","display_name":"Clover Chaff A","tags":["chaff"]},
+    {"id":"m07_clover_july_chaff_b","month":7,"flower":"clover","base_class":"chaff","display_name":"Clover Chaff B","tags":["chaff"]},
+
+    {"id":"m08_pampas_august_moon","month":8,"flower":"pampas","base_class":"bright","display_name":"Pampas Moon","tags":["bright","moon_viewing_piece"]},
+    {"id":"m08_pampas_august_geese","month":8,"flower":"pampas","base_class":"animal","display_name":"Pampas Geese","tags":["animal"]},
+    {"id":"m08_pampas_august_chaff_a","month":8,"flower":"pampas","base_class":"chaff","display_name":"Pampas Chaff A","tags":["chaff"]},
+    {"id":"m08_pampas_august_chaff_b","month":8,"flower":"pampas","base_class":"chaff","display_name":"Pampas Chaff B","tags":["chaff"]},
+
+    {"id":"m09_chrysanthemum_september_sake_cup","month":9,"flower":"chrysanthemum","base_class":"animal","display_name":"Chrysanthemum Sake Cup","tags":["animal","sake_cup","flower_viewing_piece","moon_viewing_piece"]},
+    {"id":"m09_chrysanthemum_september_blue_ribbon","month":9,"flower":"chrysanthemum","base_class":"ribbon","display_name":"Chrysanthemum Blue Ribbon","tags":["blue_ribbon"]},
+    {"id":"m09_chrysanthemum_september_chaff_a","month":9,"flower":"chrysanthemum","base_class":"chaff","display_name":"Chrysanthemum Chaff A","tags":["chaff"]},
+    {"id":"m09_chrysanthemum_september_chaff_b","month":9,"flower":"chrysanthemum","base_class":"chaff","display_name":"Chrysanthemum Chaff B","tags":["chaff"]},
+
+    {"id":"m10_maple_october_deer","month":10,"flower":"maple","base_class":"animal","display_name":"Maple Deer","tags":["animal","deer"]},
+    {"id":"m10_maple_october_blue_ribbon","month":10,"flower":"maple","base_class":"ribbon","display_name":"Maple Blue Ribbon","tags":["blue_ribbon"]},
+    {"id":"m10_maple_october_chaff_a","month":10,"flower":"maple","base_class":"chaff","display_name":"Maple Chaff A","tags":["chaff"]},
+    {"id":"m10_maple_october_chaff_b","month":10,"flower":"maple","base_class":"chaff","display_name":"Maple Chaff B","tags":["chaff"]},
+
+    {"id":"m11_willow_november_rain_man","month":11,"flower":"willow","base_class":"bright","display_name":"Willow Rain Man","tags":["bright","rain_bright"]},
+    {"id":"m11_willow_november_swallow","month":11,"flower":"willow","base_class":"animal","display_name":"Willow Swallow","tags":["animal"]},
+    {"id":"m11_willow_november_lightning_chaff","month":11,"flower":"willow","base_class":"chaff","display_name":"Willow Lightning Chaff","tags":["chaff","lightning_chaff"]},
+    {"id":"m11_willow_november_chaff","month":11,"flower":"willow","base_class":"chaff","display_name":"Willow Chaff","tags":["chaff"]},
+
+    {"id":"m12_paulownia_december_phoenix","month":12,"flower":"paulownia","base_class":"bright","display_name":"Paulownia Phoenix","tags":["bright"]},
+    {"id":"m12_paulownia_december_chaff_a","month":12,"flower":"paulownia","base_class":"chaff","display_name":"Paulownia Chaff A","tags":["chaff"]},
+    {"id":"m12_paulownia_december_chaff_b","month":12,"flower":"paulownia","base_class":"chaff","display_name":"Paulownia Chaff B","tags":["chaff"]},
+    {"id":"m12_paulownia_december_chaff_c","month":12,"flower":"paulownia","base_class":"chaff","display_name":"Paulownia Chaff C","tags":["chaff"]}
+  ]
+}
