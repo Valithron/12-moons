@@ -1,7 +1,7 @@
 # Third-Party Notices
 
-12 Moons preserves the MIT license text for every vendored or adapted source
-under `third_party/<vendor>/LICENSE`. The files under
+12 Moons preserves the license and attribution information for every vendored or
+adapted source under `third_party/<vendor>/LICENSE`. Files under
 `third_party/*/reference/` are development provenance only and are not runtime
 dependencies.
 
@@ -40,7 +40,7 @@ dependencies.
 - Copied/adapted reference paths are listed in
   `third_party/hanafuda-js/UPSTREAM.md`.
 - Provenance: `third_party/hanafuda-js/UPSTREAM.md` and `LICENSE`.
-
+  
 12 Moons is implemented in GDScript. Where upstream behavior conflicts with
 the 12 Moons Game Design Authority, 12 Moons rules take precedence.
 
@@ -57,3 +57,20 @@ the 12 Moons Game Design Authority, 12 Moons rules take precedence.
 
 No OpenCards combat, HP, energy, block, faction, HQ, credit, battlefield, art,
 or deck-builder systems are used by 12 Moons.
+
+## Louie Mantia hanafuda card art
+
+- Upstream repository: https://github.com/game-prototypes/hanafuda
+- Exact upstream commit: `170082cc3dc928987c04b1abbed6145331f72034`
+- Source path: `assets/cards/`
+- Copied paths: the manifest-referenced PNG card faces under `assets/cards/`.
+  The upstream Godot `.import` files and GPL game code are not vendored.
+- Artist: Louie Mantia.
+- License: CC BY-SA 4.0.
+- Source attribution: the upstream project identifies these images as Louie
+  Mantia artwork sourced from Wikimedia/Wikipedia.
+- Full provenance and the local license notice are in
+  `third_party/louie-mantia-hanafuda/UPSTREAM.md` and `LICENSE`.
+
+The card textures are temporary prototype art. Each stable 12 Moons card ID
+maps to one texture through `data/hanafuda/cards.json`.

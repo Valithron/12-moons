@@ -10,11 +10,12 @@ func _initialize() -> void:
 	for month in range(1, 13):
 		if catalog.cards_for_month(month).size() != 4:
 			errors.append("Month %d does not contain exactly four cards" % month)
-	var state := GameState.fresh(12, catalog)
-	if not state.invariants_ok(catalog):
-		errors.append_array(state.invariant_errors(catalog))
+	errors.append_array(catalog.validate_art_assets())
+	var ceremony := JanuarySetup.create_ceremony_state(12, catalog)
+	if not ceremony.invariants_ok(catalog):
+		errors.append_array(ceremony.invariant_errors(catalog))
 	if errors.is_empty():
-		print("12 Moons manifest and core smoke validation passed")
+		print("12 Moons January manifest and core smoke validation passed")
 		quit(0)
 	else:
 		for error in errors:

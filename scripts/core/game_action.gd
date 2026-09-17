@@ -1,7 +1,11 @@
 class_name GameAction
 extends RefCounted
 
+const SELECT_STARTER := "select_starter"
 const PLAY_CARD := "play_card"
+const CHOOSE_MATCH := "choose_match"
+const STOP := "stop"
+const KOI_KOI := "koi_koi"
 
 var action_type: String = PLAY_CARD
 var actor_id: int = 0

@@ -7,6 +7,7 @@ var flower: String = ""
 var base_class: String = ""
 var display_name: String = ""
 var tags: Array = []
+var art_path: String = ""
 
 static func from_dict(data: Dictionary) -> CardDefinition:
 	var definition := CardDefinition.new()
@@ -16,6 +17,7 @@ static func from_dict(data: Dictionary) -> CardDefinition:
 	definition.base_class = String(data.get("base_class", ""))
 	definition.display_name = String(data.get("display_name", definition.card_id))
 	definition.tags = Array(data.get("tags", [])).duplicate()
+	definition.art_path = String(data.get("art_path", ""))
 	return definition
 
 func has_tag(tag: String) -> bool:
@@ -28,5 +30,6 @@ func to_dict() -> Dictionary:
 		"flower": flower,
 		"base_class": base_class,
 		"display_name": display_name,
-		"tags": tags.duplicate()
+		"tags": tags.duplicate(),
+		"art_path": art_path
 	}
