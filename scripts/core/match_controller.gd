@@ -72,6 +72,8 @@ func advance_automatic(record: bool = true) -> bool:
 	if state.phase == GameState.PHASE_STARTER_RESULT:
 		var candidate := GameState.from_dict(state.to_dict())
 		JanuarySetup.apply_opening_deal(candidate, catalog)
+		if candidate.players[0].hand_ids.is_empty() or candidate.players[1].hand_ids.is_empty():
+			_end_month(candidate, "exhaustion", -1)
 		var errors := candidate.invariant_errors(catalog)
 		if not errors.is_empty():
 			return false
@@ -286,14 +288,19 @@ func _can_continue(candidate: GameState) -> bool:
 		return false
 	return candidate.deck.remaining_count() > 0
 
-func _pass_turn(candidate: GameState) -> void:
+func _pass_turn(candidate: GameState) -> bool:
 	candidate.turn_index += 1
 	candidate.current_player = 1 - candidate.current_player
-	candidate.phase = GameState.PHASE_HAND_PLAY
 	candidate.pending_card_id = ""
 	candidate.pending_card_source = ""
 	candidate.pending_actor_id = -1
 	candidate.pending_match_ids.clear()
+	var next_actor := candidate.player(candidate.current_player)
+	if next_actor == null or next_actor.hand_ids.is_empty() or candidate.deck.remaining_count() == 0:
+		_end_month(candidate, "exhaustion", -1)
+		return false
+	candidate.phase = GameState.PHASE_HAND_PLAY
+	return true
 
 func _apply_stop(candidate: GameState, action: GameAction) -> Dictionary:
 	if candidate.phase != GameState.PHASE_SCORE_DECISION or action.actor_id != candidate.current_player:
@@ -308,11 +315,12 @@ func _apply_koi_koi(candidate: GameState, action: GameAction) -> Dictionary:
 	candidate.koi_koi_players[action.actor_id] = true
 	var actor := candidate.player(action.actor_id)
 	candidate.previous_score_snapshots[action.actor_id] = YakuEvaluator.evaluate(actor.captured_ids, catalog, candidate.moon_id)
-	_pass_turn(candidate)
-	candidate.last_event = {
-		"kind": "koi_koi",
-		"message": "Koi-Koi declared. The month continues."
-	}
+	var passed := _pass_turn(candidate)
+	if passed:
+		candidate.last_event = {
+			"kind": "koi_koi",
+			"message": "Koi-Koi declared. The month continues."
+		}
 	return {"ok": true}
 
 func _end_month(candidate: GameState, ended_by: String, stop_player_id: int) -> void:
