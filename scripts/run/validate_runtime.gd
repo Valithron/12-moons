@@ -29,6 +29,9 @@ func _run_flow() -> void:
 	if controller == null:
 		_fail("January match screen did not receive its controller")
 		return
+	if match_screen.get("overlay_layer").mouse_filter != Control.MOUSE_FILTER_IGNORE:
+		_fail("empty overlay layer is intercepting card input")
+		return
 	match_screen.set("ai_cooldown", 0.0)
 
 	var guard := 0
@@ -40,7 +43,14 @@ func _run_flow() -> void:
 				_fail("player had no legal action in phase %s" % controller.state.phase)
 				return
 			var action: GameAction = actions[0]
-			match_screen.call("_on_card_clicked", action.target_card_id if action.action_type == GameAction.CHOOSE_MATCH else action.card_id)
+			var target_id := action.target_card_id if action.action_type == GameAction.CHOOSE_MATCH else action.card_id
+			var card := _find_selectable_card(match_screen, target_id)
+			if card == null:
+				_fail("selectable card %s was not rendered in phase %s" % [target_id, controller.state.phase])
+				return
+			# Exercise the same button signal path used by a real click:
+			# Button.pressed -> MoonCardView.card_clicked -> match screen.
+			card.emit_signal("pressed")
 		await process_frame
 		match_screen.set("ai_cooldown", 0.0)
 
@@ -71,6 +81,17 @@ func _find_button(node: Node, target_text: String) -> Button:
 		if child is Button and child.text == target_text:
 			return child
 		var nested: Button = _find_button(child, target_text)
+		if nested != null:
+			return nested
+	return null
+
+func _find_selectable_card(node: Node, target_id: String) -> MoonCardView:
+	if node == null:
+		return null
+	if node is MoonCardView and node.card_id == target_id and node.selectable and not node.disabled:
+		return node
+	for child in node.get_children():
+		var nested: MoonCardView = _find_selectable_card(child, target_id)
 		if nested != null:
 			return nested
 	return null

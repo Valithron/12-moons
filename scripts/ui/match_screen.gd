@@ -15,9 +15,15 @@ func _ready() -> void:
 	catalog = CardCatalog.new()
 	table_layer = Control.new()
 	table_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# This container is only a scene graph layer. Let its interactive children
+	# receive clicks instead of letting the empty full-screen Control consume them.
+	table_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(table_layer)
 	overlay_layer = Control.new()
 	overlay_layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The overlay is empty during normal play. Its modal dimmer gets its own
+	# mouse filter when a score decision is rendered.
+	overlay_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay_layer)
 
 func configure(match_controller: MatchController) -> void:

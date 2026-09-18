@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.2.0-prototype.4 — Starter Card Input Fix
+
+- Stop the empty full-screen UI layers from intercepting clicks on playable cards.
+- Validate that each player action reaches a rendered selectable card and its `Button.pressed` signal.
+- January gameplay rules are unchanged.
+
 ## v0.2.0-prototype.3 — Godot 4.7.2 Runtime Stability
 
 - Defer UI screen teardown so title, January intro, match, and result transitions do not free a locked signal-emitting node.
