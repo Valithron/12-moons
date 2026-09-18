@@ -1156,7 +1156,7 @@ When legal sales raise enough to cover the debt, pay the debt once and continue.
 
 If no legal remaining assets can satisfy the debt, transition to BANKRUPT.
 
-The exact resale value of free rewards and other unresolved sale rules remain design decisions and must not be invented here.
+Approved prototype resale rule: purchased modifiers sell for 50% of actual purchase price, rounded down; free reward modifiers sell for 50% of normal base shop value, rounded down.
 
 ## Settlement production choreography
 
@@ -1190,7 +1190,7 @@ Presentation rules:
 - the authoritative bankroll may already be committed before the display animation finishes;
 - skip/instant mode must land on exactly the same visible final values.
 
-**Authority status:** economy sequence follows the approved prototype baseline; final tuning/resale details remain provisional or unresolved as stated in the Game Design Authority.
+**Authority status:** economy sequence follows the approved prototype baseline. Resale handling is approved for this prototype; broader economy tuning remains provisional where the Game Design Authority says so.
 
 ---
 
@@ -1291,7 +1291,7 @@ The cash refusal remains the current working **+2 currency** value.
 
 A reward can be selected/refused exactly once.
 
-If a chosen reward cannot immediately fit because storage is full, do not secretly overflow capacity. The final placement/replacement policy is a design decision; a pending-acquisition state is an acceptable engineering representation if that policy requires a later placement resolution.
+If a chosen reward cannot immediately fit because both active and reserve storage are full, the player must replace one owned modifier: select an owned modifier to sell at its normal resale value, then place the new reward into the freed authoritative position. The player may instead refuse the reward for the normal +2 currency. A transient authoritative pending-replacement state is acceptable while that choice is unresolved, but it is not extra storage and the run cannot proceed as though both modifiers are legally stored.
 
 ## Presentation
 
@@ -1414,7 +1414,7 @@ Production choreography:
 - do not use slot-reel spins, fake cycling through dozens of possibilities, coin showers, or full-screen purchase effects;
 - repeated shopping should remain faster and quieter than reward acquisition, slot unlock, or month completion.
 
-**Authority status:** shop direction follows the approved prototype baseline; exact prices, rarity, services, resale formulas, and full-inventory policy remain configurable/unresolved where the Design Authority says so.
+**Authority status:** shop direction follows the approved prototype baseline. Exact prices, rarity, and special/service inventory remain configurable where the Game Design Authority says so; resale and full-storage purchase behavior are approved for this prototype.
 
 ---
 
@@ -1468,7 +1468,7 @@ Round-trip every between-month phase:
 
 - liquidation;
 - reward;
-- pending acquisition if used;
+- pending reward replacement/acquisition decision if one is unresolved;
 - carry;
 - shop;
 - finalize/transition.
@@ -1748,26 +1748,28 @@ The standing engineering rule is:
 
 ---
 
+# Approved Between-Month Policy Decisions
+
+The following prototype rules were explicitly approved on 2026-09-18 and are now canonical for this milestone:
+
+- **Reward generation:** after each month, generate **3 offers from the full eligible modifier pool** with no requirement to include one modifier from each family. Wider Choice changes this to **4 offers from the same full pool**.
+- **Duplicate modifiers:** Hand/Mechanic and Strategic/Meta modifier definitions cannot be owned in duplicate by default unless explicitly authored as stackable. Card Upgrade types may recur on different physical hanafuda cards, but the same Card Upgrade cannot stack multiple copies on the same physical card unless explicitly authored to allow it.
+- **Full-storage reward:** if active carry and reserve are both full, claiming a selected free reward requires replacing one owned modifier. Sell the chosen modifier at normal resale value and place the reward into the freed position. The player may instead refuse the reward for the normal +2 currency. Do not create overflow inventory.
+- **Full-storage shop purchase:** block the purchase until the player creates legal storage space, normally by selling an owned modifier. Do not auto-replace and do not create a pending-purchase inventory.
+- **Resale:** purchased modifiers sell for **50% of actual purchase price, rounded down**. Free reward modifiers sell for **50% of normal base shop value, rounded down**.
+
+These decisions resolve the former reward-family policy conflict and make a family-quota-specific Wider Choice rule unnecessary.
+
 # Design Decisions Still Requiring Explicit Approval
 
 Do not silently answer these while implementing architecture:
 
-- reward model: three from the full pool vs one per family;
-- Wider Choice's fourth slot/category under a family-quota reward model;
-- Mulligan return/shuffle procedure;
-- Second Draw behavior with one/no remaining draw cards;
-- modifier duplicate/stacking policy;
-- whether multiple Card Upgrades may stack on one physical card;
+- whether multiple **different** Card Upgrades may stack on one physical hanafuda card;
 - whether Card Upgrade reward/shop targets are fixed during generation or player-selected;
-- selected-reward behavior when both active and reserve storage are full;
-- shop-purchase behavior when storage is full;
-- exact resale formula/eligibility, including free reward modifiers;
+- exact Mulligan return/shuffle semantics;
+- Second Draw behavior when one or zero draw cards remain;
 - whether voluntary bankruptcy is allowed;
 - game-rule behavior for legitimately conflicting replacement effects.
-
-Architecture may expose explicit policy/configuration fields for these decisions. It may not choose the values.
-
----
 
 # First Between-Month Acceptance Loop
 
@@ -1782,7 +1784,7 @@ The first complete implementation should allow this exact flow:
 7. Unlock active carry slot #1.
 8. Generate and persist the free reward set from a deterministic RewardRequest.
 9. Choose one reward or take the configured cash refusal.
-10. Resolve legal placement into active/reserve/pending-acquisition state.
+10. Resolve legal placement into active/reserve state; if both are full, resolve the approved replace-and-sell choice or reward refusal before proceeding.
 11. Rearrange the build through RunActions.
 12. Generate and persist the six-offer shop.
 13. Buy, sell, reroll, inspect, compare, and rearrange without direct UI mutation.
@@ -1833,7 +1835,7 @@ Do not parallelize these systems blindly.
 8. Add ModifierDefinition / ModifierInstance / registry / handler validation.
 9. Extend headless content validation.
 10. Add deterministic RNG-scope derivation and offer-generation primitives.
-11. Add RewardRequest / RewardState / deterministic reward generator supporting both unresolved reward policies.
+11. Add RewardRequest / RewardState / deterministic reward generator using the approved full-eligible-pool policy.
 12. Implement Wider Choice through RewardRequest transformation.
 13. Implement reward select/refuse and legal acquisition placement state.
 14. Implement MOVE_MODIFIER and carry-management transactions.

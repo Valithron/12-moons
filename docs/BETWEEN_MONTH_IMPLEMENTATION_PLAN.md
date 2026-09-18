@@ -17,7 +17,7 @@ large presentation systems are outside this milestone.
 
 ## Current repository audit
 
-Baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b4cfb3712fba`.
+Original planning baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b4cfb3712fba`. The Codex implementation was later merged with repository governance on `main` at `7d4ee32a88d779d0c95a59d0407d10216a083b21`; use the current remote head for all continuation work.
 
 ### EXISTS AND SUFFICIENT
 
@@ -62,43 +62,33 @@ Baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b4cfb3712fba`.
 - Shared preparation shell, semantic Theme, focus restoration, modifier-card
   presentation, MonthPresentationProfile, and February placeholder.
 
-### BLOCKED BY DESIGN DECISION
+### APPROVED BETWEEN-MONTH POLICY DECISIONS
 
-The unresolved decisions below are recorded as stable blockers. Engineering may
-build policy-neutral schemas and tests, but must not select a gameplay rule.
+Sterling approved the following prototype rules on 2026-09-18. They supersede the prior BM-B01 through BM-B06 blockers and the earlier contradictory one-per-family reward baseline.
 
-| ID | Decision | Classification | First blocked milestone |
-|---|---|---|---|
-| BM-B01 | Whole-pool rewards or one-per-family rewards | BLOCKING NOW | BM-07 |
-| BM-B02 | Duplicate modifier policy | BLOCKING NOW | BM-05/BM-07 |
-| BM-B03 | Selected reward when active and reserve are full | BLOCKING NOW | BM-08 |
-| BM-B04 | Shop purchase when storage is full | BLOCKING NOW | BM-13 |
-| BM-B05 | Resale formula and free-reward sale eligibility | BLOCKING NOW | BM-04/BM-13 |
-| BM-B06 | Wider Choice fourth slot under family quotas | BLOCKING LATER | BM-07 if BM-B01 selects quotas |
-| BM-B07 | Fixed or player-selected Card Upgrade target | BLOCKING LATER | first Card Upgrade content |
-| BM-B08 | Multiple Card Upgrades on one physical card | BLOCKING LATER | first attachment content |
-| BM-B09 | Mulligan returned-card/shuffle procedure | BLOCKING LATER | future Mulligan behavior |
-| BM-B10 | Second Draw with one or zero cards remaining | BLOCKING LATER | future Second Draw behavior |
-| BM-B11 | Conflicting replacement-effect behavior | BLOCKING LATER | future Quad Koi behavior |
-| BM-B12 | Voluntary bankruptcy | NON-BLOCKING for this loop | future liquidation UX |
+| ID | Approved rule | Status |
+|---|---|---|
+| BM-B01 | Monthly free rewards are 3 offers drawn from the full eligible modifier pool, with no family guarantee. Wider Choice increases this to 4 offers from the same full pool. | RESOLVED |
+| BM-B02 | Hand/Mechanic and Strategic/Meta modifier definitions cannot be owned in duplicate by default unless explicitly authored as stackable. Card Upgrade types may recur on different physical hanafuda cards, but the same upgrade cannot stack multiple copies on the same physical card unless explicitly authored to allow it. | RESOLVED |
+| BM-B03 | If active carry and reserve are both full, selecting a free reward requires replacing one owned modifier. The player sells the chosen owned modifier at normal resale value and the reward takes the freed position. The player may instead refuse the reward for the normal +2 currency. No overflow inventory is created. An authoritative pending replacement choice is allowed only as transient decision state, not as extra storage. | RESOLVED |
+| BM-B04 | If storage is full in the shop, purchase is blocked until the player first creates legal space, normally by selling an owned modifier. No automatic replacement or pending-purchase inventory is created. | RESOLVED |
+| BM-B05 | Purchased modifiers sell for 50% of actual purchase price, rounded down. Free reward modifiers sell for 50% of their normal base shop price, rounded down. | RESOLVED |
+| BM-B06 | Not applicable because reward generation uses the full eligible pool rather than family quotas. Wider Choice simply changes 3 offers to 4. | RESOLVED / N/A |
 
-For every BLOCKING NOW item, implementation must stop at the stated milestone
-and ask the smallest concrete question rather than inventing a default:
+### Remaining design decisions
 
-- **BM-B01:** choose whole-pool or one-per-family rewards. Whole-pool increases
-  variance; family quotas increase consistency and require BM-B06.
-- **BM-B02:** choose no duplicate definitions or multiple instances. The latter
-  requires explicit stacking and eligibility semantics.
-- **BM-B03:** choose refusal/conversion, replacement, pre-sale/pre-move, or
-  pending acquisition when all storage is full.
-- **BM-B04:** choose rejection, replacement, pre-sale, or pending acquisition
-  for a full-storage shop purchase.
-- **BM-B05:** define sale proceeds and whether free rewards may be sold; this
-  determines liquidation recovery and shop sale behavior.
+These remain unresolved but do not block the current between-month milestone unless later authored content specifically requires them.
 
-Mulligan, Second Draw, Card Upgrade target selection/stacking, and replacement
-conflicts receive seams only during this milestone. No unresolved behavior is
-to be demonstrated with invented rules.
+| ID | Decision | Classification |
+|---|---|---|
+| BM-B07 | Fixed or player-selected Card Upgrade target | BLOCKING LATER |
+| BM-B08 | Multiple different Card Upgrades on one physical card | BLOCKING LATER |
+| BM-B09 | Mulligan returned-card/shuffle procedure | BLOCKING LATER |
+| BM-B10 | Second Draw with one or zero cards remaining | BLOCKING LATER |
+| BM-B11 | Conflicting replacement-effect behavior | BLOCKING LATER |
+| BM-B12 | Voluntary bankruptcy | NON-BLOCKING FOR THIS MILESTONE |
+
+Mulligan, Second Draw, unresolved Card Upgrade targeting/stacking, and replacement conflicts receive seams only during this milestone. Do not invent those later rules merely to demonstrate the seams.
 
 ### DEFERRED BY ROADMAP
 
@@ -111,9 +101,7 @@ and bespoke boards or seasonal content beyond the February placeholder.
 
 ## Architecture review gates
 
-`AGENTS.md` is not present in the current repository or its parent chain. Until
-the canonical file is supplied, these map-derived gates are the provisional
-review contract:
+`AGENTS.md` is present at repository root and is the permanent repository instruction layer. The following gates summarize the most relevant checks for this milestone:
 
 - **G1 Authority:** `MatchController` owns match mutation; `RunController` owns
   run mutation; no third mutation authority exists.
@@ -148,9 +136,7 @@ authority source, and validation command.
 **Existing systems to reuse:** `VERSION`, `project.godot`, `CHANGELOG.md`,
 `README.md`, and `scripts/run/validate_project.ps1`.
 
-**Deliverables:** synchronize version surfaces to the intended current version;
-record the absent `AGENTS.md` and inaccessible Game Design Authority; discover a
-Godot 4.7.2 binary; initialize the progress ledger.
+**Deliverables:** synchronize version surfaces to the intended current version; confirm root `AGENTS.md`; confirm the approved between-month policy decisions recorded from the canonical Game Design Authority; discover a Godot 4.7.2 binary; initialize/update the progress ledger.
 
 **Authority boundaries:** documentation/tooling only; no gameplay state changes.
 
@@ -300,7 +286,7 @@ successful recovery, unrecoverable bankruptcy, duplicate payment, hash invarianc
 
 **Architecture gates:** G1, G2, G4, G6.
 
-**Blockers:** BM-B05; BM-B12 only if voluntary bankruptcy is required.
+**Blockers:** BM-B12 only if voluntary bankruptcy is required. BM-B05 is resolved.
 
 **Checkpoint:** settlement fixtures and economic before/after hashes recorded.
 
@@ -336,7 +322,7 @@ January unlock, round-trip, physical 48-card conservation.
 
 **Architecture gates:** G1, G3, G4, G5.
 
-**Blockers:** BM-B02 for final duplicate policy; BM-B08 for multiple attachments.
+**Blockers:** BM-B08 for unresolved multiple-different-upgrade attachment behavior. BM-B02 is resolved.
 
 **Checkpoint:** registry/content/invariant evidence recorded.
 
@@ -405,7 +391,7 @@ exclusions, duplicate policy, 3→4 transformation, RNG isolation.
 
 **Architecture gates:** G2, G3, G5, G6.
 
-**Blockers:** BM-B01, BM-B02, BM-B06.
+**Blockers:** none for reward generation policy or duplicates. BM-B07 applies only if this milestone begins authoring real Card Upgrade targets.
 
 **Checkpoint:** record the selected approved policy before enabling acceptance flow.
 
@@ -439,7 +425,7 @@ capacity policy is followed.
 
 **Architecture gates:** G1, G2, G4, G5, G6.
 
-**Blockers:** BM-B03 and BM-B07 where applicable.
+**Blockers:** BM-B07 only where authored Card Upgrade targeting is required. BM-B03 is resolved.
 
 **Checkpoint:** acquisition location and capacity evidence recorded.
 
@@ -575,7 +561,7 @@ persisted reopen behavior, eligibility/content validation.
 
 **Architecture gates:** G2, G3, G5, G6.
 
-**Blockers:** BM-B02 and BM-B07 for authored Card Upgrade content.
+**Blockers:** BM-B07 for authored Card Upgrade target behavior. BM-B02 is resolved.
 
 **Checkpoint:** initial shop IDs/categories/prices recorded.
 
@@ -608,7 +594,7 @@ reroll, third rejection, deterministic rerolls, rejected hash invariance.
 
 **Architecture gates:** G1, G2, G3, G5, G6, G7.
 
-**Blockers:** BM-B04 and BM-B05.
+**Blockers:** none from BM-B04/BM-B05; both are resolved.
 
 **Checkpoint:** transaction hashes, currency deltas, and offer persistence recorded.
 
@@ -684,7 +670,7 @@ owned without leaving the preparation table.
 
 **Architecture gates:** G1, G6, G7, G8.
 
-**Blockers:** BM-B03 for full-capacity reward acceptance.
+**Blockers:** none from BM-B03; full-capacity reward replacement is approved.
 
 **Checkpoint:** scenario-driven UI screenshots/flow results and ledger entry.
 
@@ -720,7 +706,7 @@ consequence, reroll cost, and active/reserve state from one view.
 
 **Architecture gates:** G1, G6, G7, G8.
 
-**Blockers:** BM-B04 and BM-B05.
+**Blockers:** none from BM-B04/BM-B05; both are resolved.
 
 **Checkpoint:** transaction/UI evidence recorded.
 

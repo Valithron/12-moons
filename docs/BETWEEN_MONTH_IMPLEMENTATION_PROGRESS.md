@@ -30,9 +30,7 @@ production infrastructure required by the implementation plan.
   `scripts/run/validate_project.ps1 -GodotBinary <discovered Godot 4.7.2 binary>`
 - Baseline validation status: PASS under available Godot 4.7.1; exact Godot
   4.7.2 remains an environment preflight requirement.
-- Authority status: `AGENTS.md` and the canonical Game Design Authority were not
-  accessible. The implementation plan and development map are the active
-  fallback authority; unresolved decisions remain blockers.
+- Authority status: root `AGENTS.md` is present on merged `main`. The canonical Game Design Authority was consulted externally on 2026-09-18 and BM-B01 through BM-B05 were explicitly approved; BM-B06 is no longer applicable because full-pool rewards were chosen. A Codex runtime that cannot access the external authority must treat these recorded approved rules as authoritative for this milestone.
 
 ## Milestone table
 
@@ -42,38 +40,38 @@ production infrastructure required by the implementation plan.
 | BM-01 | RunState and prototype configuration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Serializable phase/bankroll/capacity/ownership state and invariant checks are present. |
 | BM-02 | Run actions, controller, journal, RNG scopes | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Copy-validate-commit, journal hashes, rejected-action hash invariance, and scoped RNG pass. |
 | BM-03 | MatchResult bridge and January ingestion | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Terminal-only result extraction and duplicate protection pass; boot now carries the typed result. |
-| BM-04 | Settlement, liquidation, bankruptcy | BLOCKED | 2026-09-18 | — | PASS for win/loss/tie and injected quote paths | working tree | BM-B05 | Production resale quote/free-reward policy is intentionally not selected. |
-| BM-05 | Modifier definitions, instances, capacity, placement | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 5 targeted cases | working tree | BM-B02/BM-B08 for authored content | Registry, locations, capacities, reserve inactivity, and attachment-index invariants are implemented. |
+| BM-04 | Settlement, liquidation, bankruptcy | IN PROGRESS | 2026-09-18 | — | PASS for win/loss/tie and injected quote paths | merged main | — | Resale policy is now approved; production wiring and revalidation remain. |
+| BM-05 | Modifier definitions, instances, capacity, placement | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 5 targeted cases | merged main | BM-B08 for later authored multi-upgrade behavior | Registry, locations, capacities, reserve inactivity, and attachment-index invariants are implemented; duplicate-definition policy is now approved. |
 | BM-06 | Typed modifier seams and content validation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 3 targeted cases | working tree | Later seams only | Wider Choice is real; future modifier behavior remains seams only. |
-| BM-07 | Reward generation and Wider Choice | BLOCKED | 2026-09-18 | — | PASS, 8 targeted cases | working tree | BM-B01/BM-B02/BM-B06 | Both request shapes, configured RunRules generation, and active Wider Choice 3→4 transformation pass; no production policy is silently selected. |
-| BM-08 | Reward selection/refusal/acquisition | BLOCKED | 2026-09-18 | — | PASS, 6 targeted cases | working tree | BM-B03/BM-B07 | Once-only selection/refusal and explicit pending acquisition pass; full-capacity acceptance awaits policy. |
+| BM-07 | Reward generation and Wider Choice | IN PROGRESS | 2026-09-18 | — | PASS, 8 targeted cases before policy lock | merged main | — | Full-pool 3-offer policy and Wider Choice 4-offer rule are approved; production configuration and revalidation remain. |
+| BM-08 | Reward selection/refusal/acquisition | IN PROGRESS | 2026-09-18 | — | PASS, 6 targeted cases before policy lock | merged main | BM-B07 only if real Card Upgrade targeting is introduced | Full-capacity reward replacement/refusal policy is approved; implementation and revalidation remain. |
 | BM-09 | Carry management transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, carry/attachment cases | working tree | BM-B08 for final attachment behavior | Active/reserve movement is authoritative; unresolved Card Upgrade actions reject precisely. |
 | BM-10 | Save format v1 and migration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Checksummed envelope, migration fixture, journal, and phase round-trips pass. |
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | working tree | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | working tree | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
-| BM-13 | Shop transactions | BLOCKED | 2026-09-18 | — | PASS under injected resale policy, 5 targeted cases | working tree | BM-B04/BM-B05 | Buy/reroll/sale/finalize actions exist; production full-storage and resale policies await approval. |
+| BM-13 | Shop transactions | IN PROGRESS | 2026-09-18 | — | PASS under injected policy before lock, 5 targeted cases | merged main | — | Full-storage purchase blocking and resale formulas are approved; production wiring and revalidation remain. |
 | BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 8 card-motion cases | working tree | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; full visual acceptance remains. |
-| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 6 between-month UI cases | working tree | BM-B03 | Shared shell renders causal score/debt summaries, configured reward generation, carry movement controls, six-slot shop entry, and policy blockers. |
-| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | Targeted domain/UI coverage only | working tree | BM-B04/BM-B05 | Shop grid and finalization controls are wired; full acceptance remains blocked by policy. |
+| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 6 between-month UI cases before policy lock | merged main | — | Shared shell exists; approved full-capacity replacement flow must now replace the temporary policy-blocker presentation and be visually validated. |
+| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | Targeted domain/UI coverage only | merged main | — | Shop grid/finalization controls are wired; approved capacity/resale policies must be surfaced and validated. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | working tree | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | BLOCKED | 2026-09-18 | — | Partial: 2 integration cases plus 103/103 full suite | working tree | All current blockers plus Godot 4.7.2 preflight and visual inspection | Authoritative configured win/liquidation loops converge to February; production-policy and final visual/renderer acceptance remain unclaimable. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | Partial: 2 integration cases plus 103/103 full suite under Godot 4.7.1 | merged main | Godot 4.7.2 preflight and native visual inspection | Design-policy blockers are resolved. Approved policies must be wired/revalidated, then exact-engine and visual/renderer acceptance remain. |
 
 ## Design blocker register
 
 | ID | Decision | Status | Required before |
 |---|---|---|---|
-| BM-B01 | Whole-pool versus one-per-family rewards | UNRESOLVED / BLOCKING NOW | BM-07 acceptance |
-| BM-B02 | Duplicate modifier policy | UNRESOLVED / BLOCKING NOW | BM-05/BM-07 authored content |
-| BM-B03 | Full active+reserve selected reward | UNRESOLVED / BLOCKING NOW | BM-08 full-capacity flow |
-| BM-B04 | Full-storage shop purchase | UNRESOLVED / BLOCKING NOW | BM-13 full-capacity flow |
-| BM-B05 | Resale formula and free reward eligibility | UNRESOLVED / BLOCKING NOW | BM-04/BM-13 |
-| BM-B06 | Wider Choice fourth slot under family quotas | UNRESOLVED / BLOCKING LATER | BM-07 if quotas selected |
-| BM-B07 | Card Upgrade target fixed/player-selected | UNRESOLVED / BLOCKING LATER | Card Upgrade content |
-| BM-B08 | Multiple upgrades on one physical card | UNRESOLVED / BLOCKING LATER | Attachment content |
+| BM-B01 | Full-pool versus one-per-family rewards | RESOLVED: full eligible pool, 3 offers | BM-07 production wiring |
+| BM-B02 | Duplicate modifier policy | RESOLVED: no duplicate Hand/Strategic definitions by default; Card Upgrade type may recur only on different physical cards unless explicitly stackable | content validation |
+| BM-B03 | Full active+reserve selected reward | RESOLVED: replace-and-sell one owned modifier or refuse for +2; no overflow inventory | BM-08/BM-15 production flow |
+| BM-B04 | Full-storage shop purchase | RESOLVED: block purchase until legal space exists; no automatic replacement/pending-purchase inventory | BM-13/BM-16 production flow |
+| BM-B05 | Resale/free reward eligibility | RESOLVED: purchased = 50% actual purchase price floor; free reward = 50% base shop value floor | BM-04/BM-13 production wiring |
+| BM-B06 | Wider Choice fourth slot under family quotas | RESOLVED / N/A: full-pool policy; Wider Choice changes 3 offers to 4 | BM-07 production wiring |
+| BM-B07 | Card Upgrade target fixed/player-selected | UNRESOLVED / BLOCKING LATER | authored Card Upgrade content |
+| BM-B08 | Multiple different upgrades on one physical card | UNRESOLVED / BLOCKING LATER | attachment content |
 | BM-B09 | Mulligan return/shuffle | UNRESOLVED / BLOCKING LATER | Mulligan behavior |
 | BM-B10 | Second Draw one/zero-card behavior | UNRESOLVED / BLOCKING LATER | Second Draw behavior |
-| BM-B11 | Replacement conflicts | UNRESOLVED / BLOCKING LATER | Quad Koi behavior |
-| BM-B12 | Voluntary bankruptcy | NON-BLOCKING FOR THIS MILESTONE | Future liquidation UX |
+| BM-B11 | Replacement conflicts | UNRESOLVED / BLOCKING LATER | Quad Koi/conflicting replacement behavior |
+| BM-B12 | Voluntary bankruptcy | NON-BLOCKING FOR THIS MILESTONE | future liquidation UX |
 
 ## Decisions made during implementation
 
@@ -81,6 +79,13 @@ Record reversible engineering choices here, such as file placement, schema
 version increments, test fixture names, or presentation token values. Do not
 record new gameplay canon here; use the blocker register and approved authority.
 
+Approved gameplay canon is recorded here only as a synchronization note; the canonical source remains the Game Design Authority.
+
+- 2026-09-18 policy lock: monthly free rewards are 3 offers from the full eligible modifier pool; Wider Choice changes the count to 4 without family quotas.
+- 2026-09-18 policy lock: duplicate Hand/Mechanic and Strategic/Meta modifier definitions are disallowed by default unless explicitly stackable; Card Upgrade types may recur on different physical cards but not duplicate on the same card unless explicitly allowed.
+- 2026-09-18 policy lock: with full active+reserve storage, a selected free reward requires replacing and selling one owned modifier at normal resale value, or the player may refuse for +2; no overflow inventory.
+- 2026-09-18 policy lock: a shop purchase at full storage is blocked until the player creates legal space; there is no automatic replacement or pending-purchase inventory.
+- 2026-09-18 policy lock: purchased modifiers resell for 50% of actual purchase price rounded down; free rewards resell for 50% of normal base shop value rounded down.
 - Run state uses canonical sorted arrays for hashes while raw dictionaries remain in `to_dict()` so transaction cloning preserves keyed ownership data.
 - Liquidation and sale pricing are injected `Callable` policies; absent policy produces BM-B05 instead of a guessed economic rule.
 - Shop slots persist unavailable offers when the current registry has no approved content for a category; no placeholder gameplay modifier was invented.

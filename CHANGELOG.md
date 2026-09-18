@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.0-prototype.11 — Between-Month Policy Lock
+
+- Record the five approved between-month policy decisions in the canonical Game Design Authority and synchronize the repository roadmap, implementation plan, and progress ledger.
+- Lock monthly free rewards to 3 offers from the full eligible modifier pool, with Wider Choice increasing the count to 4 without family quotas.
+- Lock default duplicate handling: no duplicate Hand/Mechanic or Strategic/Meta definitions unless explicitly stackable; Card Upgrade types may recur on different physical cards but not duplicate on the same physical card unless explicitly allowed.
+- Lock full-capacity reward handling to replace-and-sell or the normal +2 refusal, with no overflow inventory; lock full-storage shop purchases to remain blocked until legal space is created.
+- Lock resale to 50% of actual purchase price for purchased modifiers and 50% of normal base shop value for free reward modifiers, both rounded down.
+- Reconcile stale pre-merge planning notes so root `AGENTS.md`, the merged Codex implementation, and resolved BM-B01 through BM-B06 status are reflected accurately.
+- The Codex implementation foundation remains partially validated at 103/103 GdUnit4 cases under Godot 4.7.1; exact Godot 4.7.2 validation and native visual inspection remain required before BM-18 can complete.
+
 ## v0.2.0-prototype.10 — Agent Governance Preflight
 
 - Add root `AGENTS.md` with permanent repository guidance for design-authority precedence, deterministic state ownership, RNG isolation, the 48-card invariant, modifier architecture, AI privacy, UI/presentation standards, Compatibility-renderer constraints, validation, versioning, scope control, and long-running Codex goal execution.
