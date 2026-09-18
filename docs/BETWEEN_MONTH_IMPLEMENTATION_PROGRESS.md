@@ -17,15 +17,14 @@ production infrastructure required by the implementation plan.
 ## Current repository baseline
 
 - Branch: `main`
-- Base commit: `e26a5da112aef4afd5e54e25e741b4cfb3712fba`
-- `VERSION`: `0.2.0-prototype.9`
-- `project.godot` version: `0.2.0-prototype.9`
+- Current synchronized policy baseline commit: `7083487fb7d72a7ff39fd5d3fb2a83a9f4fe724b`
+- `VERSION`: `0.2.0-prototype.11`
+- `project.godot` version: `0.2.0-prototype.11`
 - Current implementation: deterministic January month, legal public-information
   AI, yaku/scoring, Stop/Koi-Koi, stable card presentation, motion queue, run
   authority, settlement/liquidation hooks, modifier/carry ownership, reward
   generation, six-slot shop transactions, save/migration, debug scenarios, and
-  the initial between-month presentation shell. The player-facing loop remains
-  intentionally stopped at unresolved Sterling policy decisions.
+  the initial between-month presentation shell. The former BM-B01 through BM-B05 policy blockers are now approved and BM-B06 is not applicable; the remaining work is to wire those approved defaults into production paths, revalidate, and finish exact-engine/native visual acceptance.
 - Required validation:
   `scripts/run/validate_project.ps1 -GodotBinary <discovered Godot 4.7.2 binary>`
 - Baseline validation status: PASS under available Godot 4.7.1; exact Godot
@@ -36,7 +35,7 @@ production infrastructure required by the implementation plan.
 
 | ID | Milestone | Status | Started | Completed | Validation | Commit | Blockers | Notes |
 |---|---|---|---|---|---|---|---|---|
-| BM-00 | Baseline and authority preflight | COMPLETE | 2026-09-18 | 2026-09-18 | PASS (provisional Godot 4.7.1) | working tree | Exact Godot 4.7.2 binary not installed; canonical Game Design Authority unavailable | Stale November asset-path test and clean-checkout import warm-up corrected. |
+| BM-00 | Baseline and authority preflight | COMPLETE | 2026-09-18 | 2026-09-18 | PASS (provisional Godot 4.7.1) | historical worktree, now merged | Exact Godot 4.7.2 binary not installed | Root `AGENTS.md` is present and the approved canonical Game Design Authority decisions are synchronized into the repo; stale November asset-path test and clean-checkout import warm-up were corrected. |
 | BM-01 | RunState and prototype configuration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Serializable phase/bankroll/capacity/ownership state and invariant checks are present. |
 | BM-02 | Run actions, controller, journal, RNG scopes | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Copy-validate-commit, journal hashes, rejected-action hash invariance, and scoped RNG pass. |
 | BM-03 | MatchResult bridge and January ingestion | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Terminal-only result extraction and duplicate protection pass; boot now carries the typed result. |
@@ -87,19 +86,12 @@ Approved gameplay canon is recorded here only as a synchronization note; the can
 - 2026-09-18 policy lock: a shop purchase at full storage is blocked until the player creates legal space; there is no automatic replacement or pending-purchase inventory.
 - 2026-09-18 policy lock: purchased modifiers resell for 50% of actual purchase price rounded down; free rewards resell for 50% of normal base shop value rounded down.
 - Run state uses canonical sorted arrays for hashes while raw dictionaries remain in `to_dict()` so transaction cloning preserves keyed ownership data.
-- Liquidation and sale pricing are injected `Callable` policies; absent policy produces BM-B05 instead of a guessed economic rule.
+- Pre-approval liquidation and sale pricing used injected `Callable` policies. Continuation work must make the approved resale formulas the production defaults while retaining deterministic testability.
 - Shop slots persist unavailable offers when the current registry has no approved content for a category; no placeholder gameplay modifier was invented.
 - Debug scenarios construct valid states, but all subsequent changes still go through `RunController.submit_action()`.
 - The January result payload preserves the existing terminal-result shape and adds a typed `match_result` bridge for the between-month screen.
-- RunRules persists empty reward/duplicate-policy fields until Sterling approves
-  the canon; controller and UI consume configured policies without selecting a
-  default. Active Wider Choice is derived only from an active owned instance
-  (or explicit test/configuration input), so reserve placement cannot affect
-  reward count.
-- End-to-end integration fixtures inject approved test policies explicitly: the
-  production run remains policy-neutral, while win and liquidation paths prove
-  authoritative action progression through the February placeholder and replay
-  hash convergence.
+- The pre-approval RunRules path persisted empty reward/duplicate-policy fields. Continuation work must replace those empty production defaults with the approved full-pool and duplicate rules while preserving configuration/fixture injection for tests. Active Wider Choice remains derived only from an active owned instance so reserve placement cannot affect reward count.
+- End-to-end integration fixtures previously injected temporary test policies. Continuation work must prove the same win/liquidation paths using the approved production defaults, while preserving replay hash convergence.
 
 ## Validation log
 

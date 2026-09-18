@@ -15,9 +15,9 @@ hover or drag, and presentation-safe under NORMAL, FAST, INSTANT, and Reduced
 Motion modes. February gameplay, the full modifier catalogue, multiplayer, and
 large presentation systems are outside this milestone.
 
-## Current repository audit
+## Original repository audit (historical planning baseline)
 
-Original planning baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b4cfb3712fba`. The Codex implementation was later merged with repository governance on `main` at `7d4ee32a88d779d0c95a59d0407d10216a083b21`; use the current remote head for all continuation work.
+Original planning baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b4cfb3712fba`. The audit categories below describe that original state and are retained as planning history, not current implementation status. The Codex implementation was later merged with repository governance at `7d4ee32a88d779d0c95a59d0407d10216a083b21`; use `docs/BETWEEN_MONTH_IMPLEMENTATION_PROGRESS.md` and the current remote head for continuation status.
 
 ### EXISTS AND SUFFICIENT
 
