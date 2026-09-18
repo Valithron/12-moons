@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.0-prototype.9 — Production Game-Feel Architecture Map
+
+- Expand `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` with the production research for physicality, animation, rendering, VFX, audio, transitions, asset production, accessibility, and performance while preserving the deterministic run and table-first UX architecture.
+- Establish a semantic `MotionProfile`, rigid-card height/shadow language, timing ceilings, immediate input acknowledgment, capture/deal/reflow recipes, and an explicit hierarchy from quiet acknowledgments through rare run landmarks.
+- Extend the presentation queue toward domain presenters with semantic events, explicit sequence/parallel/barrier recipes, NORMAL/FAST/INSTANT execution, cancellation epochs, final-state restoration, and reduced-motion behavior that cannot affect authoritative outcomes.
+- Add material-first SFX families, Master/Music/SFX/UI/Ambience bus guidance, separate cosmetic audio randomness, and a restrained music/ambience scope instead of a premature adaptive-audio system.
+- Lock Compatibility-first production direction around CanvasItem transforms, prepared textures, local parameterized shaders, sparse causal VFX, stable card art readability, and no routine full-screen post-processing.
+- Add card-resolution/import guidance, height/shadow/material rules, a tiny shared shader library, `MonthPresentationProfile` direction, seasonal-layer reuse, asset provenance/human-approval workflow, and explicit anti-synthetic presentation gates.
+- Expand settlement, carry unlock, reward, shop, and February-transition choreography so objects preserve spatial continuity and routine economic actions remain faster/quieter than true milestones.
+- Add 60 FPS headroom targets, stable profiling scenarios, 720p/high-resolution testing, texture-memory warnings, and production acceptance criteria for cancellation, reduced motion, deterministic cosmetic isolation, and repeated-action pacing.
+- Preserve all unresolved gameplay-rule questions and all prior deterministic authority boundaries; this documentation pass changes presentation architecture and production standards only.
+
 ## v0.2.0-prototype.8 — Deterministic Run Architecture Map
 
 - Rework `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` around a separate deterministic `RunState` / `RunController` authority while preserving the existing `GameState` / `MatchController` match authority.
