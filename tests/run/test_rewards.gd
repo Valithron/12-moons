@@ -208,6 +208,16 @@ func test_active_wider_choice_and_configured_rules_drive_authoritative_generatio
 	assert_bool(generated.accepted).is_true()
 	assert_int(RewardState.from_dict(controller.state.reward_state).offers.size()).is_equal(4)
 
+func test_reserve_wider_choice_does_not_change_reward_count() -> void:
+	var controller := RunController.new(1705)
+	controller.modifier_registry = _registry()
+	controller.state.phase = RunState.PHASE_REWARD
+	controller.state.reserve_capacity = 1
+	controller.state.modifier_instances["reserved_wider"] = {"instance_id": "reserved_wider", "definition_id": "wider_choice", "location": "reserve", "source": "test", "attached_card_ids": []}
+	controller.state.reserve_modifier_ids = ["reserved_wider"]
+	assert_bool(controller.submit_action(RunAction.new(RunAction.GENERATE_REWARD)).accepted).is_true()
+	assert_int(RewardState.from_dict(controller.state.reward_state).offers.size()).is_equal(3)
+
 func test_configured_duplicate_policy_can_drive_shop_without_action_payload() -> void:
 	var rules := RunRules.prototype()
 	rules.duplicate_modifier_policy = "unique_definition"

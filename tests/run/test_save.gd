@@ -67,6 +67,20 @@ func test_pending_full_capacity_reward_reloads_without_overflow() -> void:
 	assert_bool(restored_reward.pending_acquisition.is_empty()).is_false()
 	assert_int(restored_controller.state.modifier_instances.size()).is_equal(1)
 
+func test_generated_reward_offers_round_trip_without_regeneration() -> void:
+	var controller := RunController.new(1717)
+	controller.state.phase = RunState.PHASE_REWARD
+	assert_bool(controller.submit_action(RunAction.new(RunAction.GENERATE_REWARD)).accepted).is_true()
+	var before := RewardState.from_dict(controller.state.reward_state)
+	var data := RunSave.envelope(controller)
+	var restored := RunSave.restore_controller(data)
+	assert_bool(restored.get("ok", false)).is_true()
+	var restored_controller: RunController = restored["controller"]
+	var after := RewardState.from_dict(restored_controller.state.reward_state)
+	assert_bool(after.generated).is_true()
+	assert_array(after.offers).is_equal(before.offers)
+	assert_str(restored_controller.state.state_hash()).is_equal(controller.state.state_hash())
+
 func test_legacy_save_fixture_migrates_to_v1() -> void:
 	var legacy_payload := {
 		"root_seed": 42,
