@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.0-prototype.10 — Agent Governance Preflight
+
+- Add root `AGENTS.md` with permanent repository guidance for design-authority precedence, deterministic state ownership, RNG isolation, the 48-card invariant, modifier architecture, AI privacy, UI/presentation standards, Compatibility-renderer constraints, validation, versioning, scope control, and long-running Codex goal execution.
+- Make the Game Design Authority the explicit source of truth for gameplay decisions while directing implementation agents to continue independent work rather than silently invent unresolved rules.
+- Require generated code to extend the existing authoritative paths, preserve replay/save/hash invariants, and pass a project-specific AI-assisted architecture review gate.
+- Restore canonical version-source consistency by advancing both `VERSION` and `project.godot` to `0.2.0-prototype.10`; prior documentation-only prototype bumps had left `VERSION` behind.
+- No gameplay rules, scoring values, economy values, modifier effects, presentation behavior, or renderer behavior are changed by this governance pass.
+
 ## v0.2.0-prototype.9 — Production Game-Feel Architecture Map
 
 - Expand `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` with the production research for physicality, animation, rendering, VFX, audio, transitions, asset production, accessibility, and performance while preserving the deterministic run and table-first UX architecture.
