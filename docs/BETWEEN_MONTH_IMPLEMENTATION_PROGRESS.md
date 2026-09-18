@@ -18,7 +18,7 @@ production infrastructure required by the implementation plan.
 
 - Branch: `main`
 - Starting synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
-- Current committed implementation checkpoint: `317d11b`
+- Current committed implementation checkpoint: `851ae10`
 - `VERSION`: `0.2.0-prototype.11`
 - `project.godot` version: `0.2.0-prototype.11`
 - Current implementation: deterministic January month, legal public-information
@@ -65,11 +65,11 @@ production infrastructure required by the implementation plan.
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | 317d11b | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | 317d11b | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
 | BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll cases | 317d11b | ENV-BM-01 for final release gate | Full storage blocks purchase without consuming currency/offer; sale uses the same authoritative resale policy. |
-| BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 8 card-motion cases | 317d11b | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; full visual acceptance remains. |
+| BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 9 card-motion cases | 851ae10 | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; all tested motion modes converge on the same card state; full visual acceptance remains. |
 | BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, updated between-month UI suite under Godot 4.7.1 | 317d11b | CONTENT-BM-01, UX-BM-01 | Shared shell now presents authoritative liquidation quotes and full-capacity replacement/refusal actions; native visual acceptance remains. |
 | BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, updated integration/UI coverage under Godot 4.7.1 | 317d11b | CONTENT-BM-01, UX-BM-01 | Six category slots, sale, buy rejection, reroll, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 110/110 across 21 suites under Godot 4.7.1 | 317d11b | ENV-BM-01, UX-BM-01, CONTENT-BM-01 | Approved policy implementation is green under the available engine; exact-engine, native visual, and authored-content acceptance remain. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 111/111 across 21 suites under Godot 4.7.1 | 851ae10 | ENV-BM-01, UX-BM-01, CONTENT-BM-01 | Approved policy implementation is green under the available engine; exact-engine, native visual, and authored-content acceptance remain. |
 
 ## Design blocker register
 
@@ -138,6 +138,8 @@ Append-only entries in the format:
 - 2026-09-18 — exact-engine/native inspection preflight — Godot 4.7.2 search and native CUA inspection — NOT AVAILABLE — no Godot 4.7.2 executable found and no interactive/native Godot surface was exposed — ENV-BM-01 / UX-BM-01
 - 2026-09-18 — canonical authority audit — authenticated read of `12 Moons — Game Design Authority` — PASS — approved reward/carry/shop/resale rules and modifier catalogue confirmed; later execution blockers remain explicitly unresolved — 317d11b
 - 2026-09-18 — post-checkpoint full validation — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — committed checkpoint passes the project/core smoke path and retains the 110/110 suite result; validator warns that only 1/3 eligible reward definitions are authored; generated `.import` metadata was restored — 317d11b
+- 2026-09-18 — BM-14 motion convergence checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests/integration/test_card_motion.gd --ignoreHeadlessMode` — PASS — 9/9 card-motion, cancellation, reduced-motion, and NORMAL/FAST/INSTANT/REDUCED final-state convergence cases — 851ae10
+- 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 111/111 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — 851ae10
 
 ## Known deferred work
 
