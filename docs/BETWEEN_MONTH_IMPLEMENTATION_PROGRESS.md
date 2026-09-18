@@ -31,14 +31,14 @@ production infrastructure required by the implementation plan.
   modifier seam is being activated.
 - Required validation:
   `scripts/run/validate_project.ps1 -GodotBinary <discovered Godot 4.7.2 binary>`
-- Baseline validation status: PASS under available Godot 4.7.1; exact Godot
-  4.7.2 remains an environment preflight requirement.
+- Baseline validation status: PASS under exact Godot 4.7.2; native visual
+  acceptance remains a human/environment check.
 - Authority status: root `AGENTS.md` is present on merged `main`. The continuation objective and merged repository authority notes record BM-B01 through BM-B05 as approved; BM-B06 is no longer applicable because full-pool rewards were chosen. The authenticated canonical **12 Moons — Game Design Authority** was read during the 2026-09-18 continuation audit. It confirms the approved full-pool reward/carry/shop/resale rules and the approved modifier catalogue; unresolved execution details remain recorded in the blocker register and no additional rule is inferred.
 
 ## Current acceptance blockers
 
-- `ENV-BM-01` — no Godot 4.7.2 executable is available in the discovered
-  environment; the full suite is currently provisional under Godot 4.7.1.
+- `ENV-BM-01` — RESOLVED by downloading the official Godot 4.7.2 standard
+  Windows archive; the exact project validator now passes.
 - `UX-BM-01` — native CUA inspection did not expose an interactive Godot/native
   surface, so visual acceptance remains a human/environment check.
 - `CONTENT-BM-01` — RESOLVED by the validated addition of the two canonical
@@ -50,11 +50,11 @@ production infrastructure required by the implementation plan.
 
 | ID | Milestone | Status | Started | Completed | Validation | Commit | Blockers | Notes |
 |---|---|---|---|---|---|---|---|---|
-| BM-00 | Baseline and authority preflight | COMPLETE | 2026-09-18 | 2026-09-18 | PASS (provisional Godot 4.7.1) | historical worktree, now merged | Exact Godot 4.7.2 binary not installed | Root `AGENTS.md` is present and the approved canonical Game Design Authority decisions are synchronized into the repo; stale November asset-path test and clean-checkout import warm-up were corrected. |
+| BM-00 | Baseline and authority preflight | COMPLETE | 2026-09-18 | 2026-09-18 | PASS under exact Godot 4.7.2 | historical worktree, now merged | — | Root `AGENTS.md` is present and the approved canonical Game Design Authority decisions are synchronized into the repo; stale November asset-path test and clean-checkout import warm-up were corrected. |
 | BM-01 | RunState and prototype configuration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | 317d11b | — | Serializable phase/bankroll/capacity/ownership state and invariant checks are present. |
 | BM-02 | Run actions, controller, journal, RNG scopes | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | 317d11b | — | Copy-validate-commit, journal hashes, rejected-action hash invariance, and scoped RNG pass. |
 | BM-03 | MatchResult bridge and January ingestion | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | 317d11b | — | Terminal-only result extraction and duplicate protection pass; boot now carries the typed result. |
-| BM-04 | Settlement, liquidation, bankruptcy | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, settlement/liquidation/bankruptcy and authoritative resale cases | 317d11b | ENV-BM-01 for final release gate | Shared `ModifierResalePolicy` now drives emergency liquidation and exact-zero/debt outcomes without injected production quotes. |
+| BM-04 | Settlement, liquidation, bankruptcy | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, settlement/liquidation/bankruptcy and authoritative resale cases | 317d11b | — | Shared `ModifierResalePolicy` now drives emergency liquidation and exact-zero/debt outcomes without injected production quotes. |
 | BM-05 | Modifier definitions, instances, capacity, placement | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 5 targeted cases | merged main | BM-B08 for later authored multi-upgrade behavior | Registry, locations, capacities, reserve inactivity, and attachment-index invariants are implemented; duplicate-definition policy is now approved. |
 | BM-06 | Typed modifier seams and content validation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 3 targeted cases | 317d11b | Later seams only | Wider Choice is real; future modifier behavior remains seams only. |
 | BM-07 | Reward generation and Wider Choice | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, reward/seam/shop suites and full suite 116/116 under Godot 4.7.1 | 787a6a4 | ENV-BM-01 | Approved defaults, full-pool 3 offers, Wider Choice 4 offers, exclusion, persistence, deterministic generation, and three canonical non-seam definitions are wired. |
@@ -63,12 +63,12 @@ production infrastructure required by the implementation plan.
 | BM-10 | Save format v1 and migration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | 317d11b | — | Checksummed envelope, migration fixture, journal, and phase round-trips pass. |
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | 317d11b | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | 317d11b | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
-| BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll, Salvage, and Rain Check cases | 787a6a4 | ENV-BM-01 for final release gate | Full storage blocks purchase without consuming currency/offer; sale and Salvage use explicit shared economy rules; preserved offers persist and return in the next generated month slot. |
+| BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll, Salvage, and Rain Check cases | 787a6a4 | — | Full storage blocks purchase without consuming currency/offer; sale and Salvage use explicit shared economy rules; preserved offers persist and return in the next generated month slot. |
 | BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 9 card-motion cases | 851ae10 | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; all tested motion modes converge on the same card state; full visual acceptance remains. |
 | BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Shared shell presents authoritative liquidation, replacement/refusal, Salvage, and carry actions; native visual acceptance remains. |
 | BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Six category slots, sale, buy rejection, reroll, Rain Check preservation, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under Godot 4.7.1 | e579508 | ENV-BM-01, UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the available engine; exact-engine and native visual acceptance remain. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2 | 192f011 | UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the exact engine; native visual acceptance remains. |
 
 ## Design blocker register
 
@@ -144,6 +144,7 @@ Append-only entries in the format:
 - 2026-09-18 — reward persistence and reserve-inactivity checkpoint — targeted `test_rewards.gd` and `test_save.gd` — PASS — 20/20 cases including reserve Wider Choice inactivity and generated-offer save/load without regeneration — bd8626a
 - 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 118/118 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — bd8626a
 - 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — e579508
+- 2026-09-18 — exact-engine full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` — PASS — Godot 4.7.2 January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — working tree
 
 ## Known deferred work
 
