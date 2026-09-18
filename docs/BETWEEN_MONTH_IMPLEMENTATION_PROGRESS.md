@@ -18,7 +18,7 @@ production infrastructure required by the implementation plan.
 
 - Branch: `main`
 - Starting synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
-- Current committed implementation checkpoint: `a882294`
+- Current committed implementation checkpoint: `88548a0`
 - `VERSION`: `0.2.0-prototype.11`
 - `project.godot` version: `0.2.0-prototype.11`
 - Current implementation: deterministic January month, legal public-information
@@ -68,7 +68,7 @@ production infrastructure required by the implementation plan.
 | BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Shared shell presents authoritative liquidation, replacement/refusal, Salvage, and carry actions; native visual acceptance remains. |
 | BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Six category slots, sale, buy rejection, reroll, Rain Check preservation, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2 | 192f011 | UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the exact engine; native visual acceptance remains. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2 | 88548a0 | UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the exact engine; native visual acceptance remains. |
 
 ## Design blocker register
 
