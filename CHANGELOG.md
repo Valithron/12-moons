@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.0-prototype.7 — Between-Month UX Architecture Map
+
+- Revise `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` around the research-backed table-first UX direction while preserving the Game Design Authority as the source of gameplay rules.
+- Make one shared preparation environment the implementation target for settlement, reward, carry management, shop, and finalization, with stable carry and bankroll anchors.
+- Move semantic Theme, Container-based structural layout, focus/navigation, readable typography, inspect/tooltip equivalence, reduced-motion, and localization-resilience work ahead of the expanding between-month surface.
+- Require the full eight-slot carry tray to be visible from the first between-month sequence, with future slots locked, active/reserve state communicated redundantly, and select-to-destination as the canonical interaction.
+- Add concrete reward/shop UX constraints for modifier-vs-hanafuda visual separation, a stable 3 × 2 six-offer shop, explicit affordability/capacity errors, predictable focus restoration, and semantic action copy.
+- Flag the current reward-family authority conflict as still unresolved rather than using UX research to silently choose a gameplay rule.
+- No January gameplay rules, scoring rules, economy values, modifier effects, or renderer behavior are changed by this documentation pass.
+
 ## v0.2.0-prototype.6 — Hanafuda Card Motion
 
 - Add persistent stable-ID `MoonCardView` presentation so cards visibly travel between hands, field, draw resolution, and capture spreads.
