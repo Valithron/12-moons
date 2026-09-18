@@ -18,7 +18,7 @@ production infrastructure required by the implementation plan.
 
 - Branch: `main`
 - Starting synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
-- Current committed implementation checkpoint: `bd8626a`
+- Current committed implementation checkpoint: `e579508`
 - `VERSION`: `0.2.0-prototype.11`
 - `project.godot` version: `0.2.0-prototype.11`
 - Current implementation: deterministic January month, legal public-information
@@ -68,7 +68,7 @@ production infrastructure required by the implementation plan.
 | BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Shared shell presents authoritative liquidation, replacement/refusal, Salvage, and carry actions; native visual acceptance remains. |
 | BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Six category slots, sale, buy rejection, reroll, Rain Check preservation, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator pending under Godot 4.7.1 | bd8626a | ENV-BM-01, UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the available engine; exact-engine and native visual acceptance remain. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under Godot 4.7.1 | e579508 | ENV-BM-01, UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the available engine; exact-engine and native visual acceptance remain. |
 
 ## Design blocker register
 
@@ -143,6 +143,7 @@ Append-only entries in the format:
 - 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 116/116 GdUnit4 cases; authored-content warning cleared; generated `.import` metadata restored — 787a6a4
 - 2026-09-18 — reward persistence and reserve-inactivity checkpoint — targeted `test_rewards.gd` and `test_save.gd` — PASS — 20/20 cases including reserve Wider Choice inactivity and generated-offer save/load without regeneration — bd8626a
 - 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 118/118 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — bd8626a
+- 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — e579508
 
 ## Known deferred work
 
