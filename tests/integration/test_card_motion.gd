@@ -158,6 +158,29 @@ func test_motion_timings_expose_fast_and_reduced_modes() -> void:
 	assert_float(timings.duration(MoonMotionTimings.PLAY_TRAVEL)).is_equal(0.0)
 	assert_bool(timings.is_reduced()).is_true()
 
+func test_all_motion_modes_converge_on_the_same_card_state() -> void:
+	var host := Control.new()
+	add_child(host)
+	var card := MoonCardView.new()
+	host.add_child(card)
+	var catalog := CardCatalog.new()
+	card.configure(catalog.get_card("m01_pine_january_crane"), false, true, false, Vector2(64, 96))
+	await get_tree().process_frame
+	var target := Vector2(240, 180)
+	for mode in [MoonMotionTimings.Mode.NORMAL, MoonMotionTimings.Mode.FAST, MoonMotionTimings.Mode.INSTANT, MoonMotionTimings.Mode.REDUCED]:
+		card.position = Vector2.ZERO
+		card.set_slot_position(Vector2.ZERO)
+		card.set_face_up(false)
+		var timings := MoonMotionTimings.new()
+		timings.mode = mode
+		var motion := MoonCardMotionController.new(host, timings)
+		await motion.move(card, target, 0.01)
+		await motion.flip(card, true, 0.01)
+		assert_float(card.position.x).is_equal_approx(target.x, 0.01)
+		assert_float(card.position.y).is_equal_approx(target.y, 0.01)
+		assert_bool(card.face_up).is_true()
+	host.queue_free()
+
 func _record_queue_job(events: Array, label: String) -> void:
 	events.append("start:" + label)
 	await get_tree().process_frame
