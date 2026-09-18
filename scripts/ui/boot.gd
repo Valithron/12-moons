@@ -36,7 +36,7 @@ func _show_title() -> void:
 
 func _show_january_intro() -> void:
 	_clear_screen()
-	var intro := load("res://scenes/moon_intro/moon_intro.tscn").instantiate()
+	var intro = load("res://scenes/moon_intro/moon_intro.tscn").instantiate()
 	add_child(intro)
 	screen = intro
 	intro.continue_pressed.connect(_begin_january)
@@ -46,7 +46,7 @@ func _begin_january() -> void:
 	run_number += 1
 	var controller := MatchController.new(12012000 + run_number)
 	controller.begin_january(12012000 + run_number)
-	var match_screen := load("res://scenes/match/match.tscn").instantiate()
+	var match_screen = load("res://scenes/match/match.tscn").instantiate()
 	add_child(match_screen)
 	screen = match_screen
 	match_screen.configure(controller)
@@ -54,7 +54,7 @@ func _begin_january() -> void:
 
 func _show_result(result: Dictionary) -> void:
 	_clear_screen()
-	var result_screen := load("res://scenes/result/result.tscn").instantiate()
+	var result_screen = load("res://scenes/result/result.tscn").instantiate()
 	add_child(result_screen)
 	screen = result_screen
 	result_screen.setup(result)

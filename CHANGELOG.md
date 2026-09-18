@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.0-prototype.2 — Godot 4.7 Launch Fix
+
+- Fix Godot 4.7.2 parser/type-inference errors in `boot.gd` when dynamically instantiated scenes are assigned with inferred `:=` declarations.
+- January gameplay rules and behavior are unchanged.
+
 ## v0.2.0-prototype.1 — January Playable Month
 
 This milestone turns the deterministic foundation into the first playable 12 Moons
