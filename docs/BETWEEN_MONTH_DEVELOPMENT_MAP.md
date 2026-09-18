@@ -2,64 +2,467 @@
 
 Status: Planning map only. Expand each section into a dedicated design/implementation spec before building it.
 
-This document defines the next ordered development steps after the playable January match and initial card-motion pass. It incorporates the current UX research direction while preserving the Game Design Authority as the source of truth for gameplay rules. Research-derived UI recommendations in this document are implementation guidance, not silent changes to locked or unresolved game rules.
+This document defines the next ordered development steps after the playable January match and initial card-motion pass. It incorporates the current UX research and deterministic run-architecture research while preserving the Game Design Authority as the source of truth for gameplay rules.
+
+Research-derived architecture and UX recommendations in this document are implementation guidance. They must not silently resolve gameplay decisions that the Game Design Authority marks as WORKING, PROTOTYPE, UNRESOLVED, or contradictory.
 
 ## North-Star Milestone
 
 Prove the first complete roguelike month loop around the existing hanafuda game:
 
-play January → settle money → unlock carry capacity → choose reward → prepare carry build → shop → finalize build → Begin February
+`play January → settle money → unlock carry capacity → choose reward → prepare carry build → shop → finalize build → Begin February`
 
 For this milestone, **Begin February may end at a clean placeholder**. Do not build February gameplay until the between-month loop itself is proven.
 
-The between-month experience should feel like a continuation of the same tabletop world, not a stack of unrelated menus. Settlement, reward, carry management, shop, and finalization should occupy one shared preparation environment with stable spatial anchors for the carry build and bankroll.
+The milestone must prove two things at once:
+
+1. the player-facing loop is clear, tactile, and feels like one continuous tabletop experience; and
+2. the run layer is deterministic, replayable, saveable, testable, and incapable of bypassing the existing authoritative match architecture.
 
 ---
 
-## 0. UX Architecture Foundation
+# 0. Deterministic Run Architecture Foundation
 
-Build the reusable interface foundation before the between-month feature surface multiplies.
+This is the first engineering dependency. Do not let reward, shop, carry, or money UI create temporary sources of truth that later need to be replaced.
 
-### Shared preparation shell
+## Authority boundary
 
-- Establish one persistent between-month **PhaseShell / preparation-table environment**.
-- Use a restrained orientation rail such as:
-  - Settlement
-  - Reward
-  - Prepare
-  - Shop
-  - February
-- The rail communicates progression. It should not behave like a tab bar unless backtracking is intentionally supported.
-- Settlement should visually transform from the January result rather than cutting to a completely unrelated dashboard.
-- Reward and shop offers should reuse the same offer region.
-- Carry and bankroll should remain in stable locations through reward, preparation, shop, and finalization.
+Preserve the existing match architecture and add a parallel run-level authority:
 
-### Structural layout rules
+```text
+RunSession / scene orchestration
+        │
+        ├── RunController ──► RunState
+        │
+        └── MatchController ─► GameState
+```
+
+Rules:
+
+- **RunState** owns persistent year/run data:
+  - current month;
+  - run phase;
+  - bankroll;
+  - unlocked active carry capacity;
+  - reserve capacity;
+  - modifier instances and authoritative locations;
+  - reward state;
+  - shop state;
+  - pending settlement/liquidation;
+  - root run seed and generation counters.
+- **GameState** remains the authoritative state for the active hanafuda match.
+- **RunController** is the sole run-layer mutation gateway.
+- **MatchController** remains the sole match-layer mutation gateway.
+- RunController must not directly mutate live GameState.
+- MatchController must not mutate bankroll, carry, rewards, or shop state.
+- UI and scenes observe state and submit actions. They do not calculate or commit authoritative outcomes.
+- Do not rename GameState merely for conceptual purity during this milestone unless the rename is essentially free and demonstrably low-risk.
+
+## MatchResult bridge
+
+When January reaches its terminal authoritative state, create a small serializable MatchResult containing at least:
+
+- match ID;
+- month;
+- winner/result;
+- final resolved score;
+- end reason;
+- final match-state hash.
+
+The completed match enters the run layer through an action equivalent to:
+
+`RESOLVE_MONTH(match_result)`
+
+The UI must never directly perform bankroll math.
+
+A match result ID may be settled exactly once.
+
+## Run phases
+
+Use explicit authoritative phases rather than inferring progression from visible screens.
+
+At minimum:
+
+```text
+MONTH_MATCH
+LIQUIDATION
+REWARD
+CARRY
+SHOP
+FINALIZE
+TRANSITION
+BANKRUPT
+COMPLETE
+```
+
+The immediate flow is:
+
+```text
+January terminal match
+      ↓
+RESOLVE_MONTH
+      ↓
+settlement
+  ┌───┴──────────────────┐
+  │ payable              │ debt cannot yet be covered
+  ↓                      ↓
+slot unlock          LIQUIDATION
+  │                      │
+  │                 liquidation actions
+  │                      ↓
+  │                debt satisfied?
+  │                 yes / impossible
+  │                  ↓       ↓
+  └──────────────► REWARD   BANKRUPT
+                      ↓
+                    CARRY
+                      ↓
+                     SHOP
+                      ↓
+                  FINALIZE
+                      ↓
+                  TRANSITION
+                      ↓
+          FEBRUARY PLACEHOLDER
+```
+
+Pending player choices must exist in authoritative state and legal actions. Never represent an unresolved gameplay decision only by an animation callback, coroutine, modal Node, Timer, or awaited signal.
+
+## Copy-validate-commit
+
+RunController should deliberately extend the current MatchController transaction model:
+
+1. validate the current RunState;
+2. validate the requested RunAction;
+3. clone the current run state;
+4. apply the action to the candidate;
+5. validate all run invariants;
+6. commit only if valid;
+7. record the action and resulting state hash.
+
+Rejected actions must leave the canonical state hash unchanged.
+
+Do not create separate mutation-owning ShopController, RewardController, CarryManager, EconomyManager, ModifierManager, or similar parallel authorities. Narrow pure helpers are appropriate, but mutation remains centralized in RunController.
+
+## RunState invariants
+
+RunState should expose the same basic disciplines already used by GameState:
+
+- `to_dict()`;
+- `from_dict()`;
+- canonical dictionary/JSON;
+- deterministic state hash;
+- `invariant_errors()`;
+- `invariants_ok()`.
+
+At minimum validate:
+
+- bankroll never becomes negative in canonical state;
+- month is in a legal range;
+- every modifier instance ID is unique;
+- every owned modifier exists in exactly one legal authoritative location;
+- active count does not exceed unlocked active capacity;
+- reserve count does not exceed reserve capacity;
+- reserve modifiers are excluded from active effect projection;
+- card attachments reference real stable card IDs;
+- referenced modifier definitions exist;
+- RewardState exists only when appropriate;
+- ShopState exists only when appropriate;
+- PendingSettlement exists only when appropriate;
+- a match result cannot be settled twice;
+- shop/reward offer IDs are unique;
+- a consumed offer cannot be consumed twice.
+
+Use stable serialized string IDs for phases, actions, content, offers, and modifier instances. Do not rely on reordered numeric enums as persistent identifiers.
+
+## Prototype configuration
+
+Keep tunable prototype values centralized in a small run-rules data file rather than scattering literals through UI and effect handlers.
+
+Examples:
+
+- starting bankroll = 20;
+- reserve capacity = 4;
+- maximum active slots = 8;
+- January-through-August unlock schedule;
+- reward refusal cash = +2;
+- shop reroll costs = [1, 2];
+- prototype prices/weights when defined.
+
+These remain prototype values where the Design Authority says they are not locked.
+
+**Architecture status:** engineering direction to lock for implementation. This section does not alter game-design values.
+
+---
+
+# 1. Deterministic RNG, Persistence, and Content Contracts
+
+These foundations must exist before rewards and shops become authoritative systems.
+
+## RNG ownership
+
+Use one persistent root run seed, but **not one mutable global gameplay RNG stream**.
+
+Derive local deterministic RNG scopes using a fixed stable hash over inputs such as:
+
+```text
+root_run_seed
+generation_schema_version
+subsystem
+month
+sequence
+```
+
+Expected scopes include:
+
+- match/deck/month;
+- reward/month/generation;
+- shop/month/initial;
+- shop/month/reroll/1;
+- shop/month/reroll/2;
+- future modifier-specific scopes.
+
+Requirements:
+
+- no authoritative global `rand*()` or `randomize()`;
+- deterministic candidate collections must be put into a stable order before random selection;
+- VFX, sound pitch, particles, wobble, and presentation randomness use separate non-authoritative RNG;
+- adding one random call in AI or presentation must not change a future reward, shop, or deck;
+- once a deck, reward set, or shop is generated, persist the generated result in authoritative state rather than regenerating it when UI opens.
+
+Do not promise permanent cross-Godot-version reconstruction from seed alone. Persist generated authoritative outcomes and version the derivation scheme.
+
+## Authoritative content model
+
+Use the existing pattern rather than introducing a general data framework:
+
+- JSON for deterministic gameplay definitions and prototype configuration;
+- GDScript for executable rule handlers, schemas, registries, and validators;
+- optional Resources for immutable/presentation metadata;
+- scenes for visual composition only.
+
+Do not store per-run mutable authority in shared loaded Resources.
+
+Recommended data areas:
+
+- `data/modifiers/modifiers.json`;
+- `data/run/run_rules.json`;
+- shop-table data if/when needed;
+- Moon definitions later.
+
+## Headless content validation
+
+Extend the existing project validator so malformed content fails loudly before gameplay.
+
+Validate at least:
+
+- unique modifier IDs;
+- all effect-handler keys registered;
+- valid modifier family/target combinations;
+- referenced hanafuda card IDs exist;
+- required fields present;
+- forbidden fields absent where appropriate;
+- price/weight values nonnegative;
+- configured run-rule values valid;
+- each baseline shop slot can produce at least one eligible candidate;
+- renamed-ID aliases do not cycle;
+- referenced assets/definitions exist;
+- typed definition round-trip succeeds.
+
+Keep GdUnit4 as the test framework.
+
+## Save format v1
+
+Once the between-month domain state exists, implement an explicit versioned JSON save envelope.
+
+It should include authoritative state only:
+
+- RunState;
+- modifier instances and placement;
+- root seed and generation counters;
+- reward/shop/liquidation state;
+- active MatchState snapshot when a match is active;
+- run and match action/replay journals as appropriate;
+- schema/game/content versions;
+- payload checksum/hash.
+
+Do not serialize:
+
+- Nodes/scenes;
+- Controls;
+- Tweens/Timers;
+- animation queue progress;
+- textures/audio copies;
+- Callables;
+- UI selection/focus;
+- mutable Resource graphs.
+
+Add a migration chain from schema v1 onward. Migration functions should be explicit dictionary transformations.
+
+Removed or renamed content IDs must have explicit migration/alias behavior. Never silently discard unknown content from a save.
+
+Use crash-resistant temp-write → verify → backup/rotate previous save → replace-final behavior. Treat this as best-effort filesystem safety, not a mathematical guarantee.
+
+**Milestone requirement:** closing/reloading during reward, carry, shop, or liquidation must restore the same authoritative state and continue deterministically.
+
+---
+
+# 2. Modifier Definition / Instance / Effect Architecture
+
+Do not wire modifiers as scattered `if modifier_id == ...` conditionals.
+
+## Three-layer model
+
+Use:
+
+```text
+immutable ModifierDefinition
+        ↓
+persistent ModifierInstance
+        ↓
+typed effect handler(s)
+```
+
+A definition contains stable authored data such as:
+
+- modifier ID;
+- family;
+- target kind;
+- effect specs;
+- base price/offer data where appropriate;
+- optional AI semantic metadata.
+
+An instance contains run-specific data such as:
+
+- stable instance ID;
+- definition ID;
+- acquired month;
+- acquisition source;
+- actual purchase price where applicable;
+- target card ID for Card Upgrades;
+- authoritative location;
+- persistent run-long state.
+
+Card Upgrades attach to stable physical hanafuda card IDs. They must not mutate CardDefinition or create duplicate card copies.
+
+## Ownership model
+
+Distinguish:
+
+- **economic owner**: whose run owns the modifier;
+- **effect subject**: player or physical hanafuda card;
+- **beneficiary**: determined by the effect.
+
+A Card Upgrade such as Sweep belongs to the player's run economically but follows the physical upgraded card when that card is captured/used, including by the AI where the approved effect says it is shared-risk.
+
+Reserve modifiers remain owned but are excluded from the active effect projection.
+
+## Typed effect domains
+
+Use small typed rule pipelines rather than a universal event bus.
+
+Initial concrete domains:
+
+- RewardRequest transformation;
+- CapturePlan augmentation;
+- structured scoring/ScoreBreakdown adjustment;
+- draw-decision provider;
+- opening-decision provider;
+- named multiplier replacement.
+
+Add new hooks only when a concrete approved modifier or Moon rule requires them.
+
+The registry may map stable handler keys to preloaded GDScript handlers. Gameplay systems should depend on domains/handlers, not on modifier IDs.
+
+## Effect order
+
+Before many modifiers exist, establish deterministic operation metadata:
+
+- domain;
+- stage;
+- explicit priority;
+- source kind;
+- stable source ID;
+- stable operation ID;
+- mode.
+
+Keep modes small and explicit, such as:
+
+- REPLACE;
+- PREVENT;
+- ADD;
+- MULTIPLY;
+- AUGMENT.
+
+Stable ID ordering is only the final deterministic tie-break. If intended behavior depends on arbitrary IDs, the priorities/compatibility rules are underspecified.
+
+Same-priority noncommutative replacement conflicts should fail validation in development unless an explicit coexistence rule exists.
+
+## Trigger safety
+
+Each effect-resolution chain should have a stable root event token and prevent the same modifier from retriggering the same hook for the same event unless explicitly marked repeatable.
+
+A defensive recursion/depth limit may exist, but exceeding it should fail loudly before commit rather than silently truncating resolution.
+
+Charges/once-per-month usage are consumed only on successful authoritative commit.
+
+## Moon-rule future seam
+
+Future Moon rules should eventually participate as another rule source in the same typed pipelines:
+
+```text
+base rules
+Moon rule
+active card upgrades
+active player modifiers
+```
+
+Do not build a second parallel Moon-effect engine.
+
+**Architecture status:** engineering direction. Exact modifier stacking, duplicate policy, and conflict game rules remain design decisions where noted below.
+
+---
+
+# 3. UX Architecture Foundation
+
+Build the reusable interface foundation without allowing it to own run truth.
+
+## Shared preparation shell
+
+Establish one persistent between-month **PhaseShell / preparation-table environment**.
+
+Use a restrained orientation rail such as:
+
+- Settlement
+- Reward
+- Prepare
+- Shop
+- February
+
+The rail communicates orientation, not authority. The current RunState phase decides what is legal.
+
+Settlement should visually transform from the January result rather than cutting to a completely unrelated dashboard.
+
+Reward and shop offers should reuse the same offer region.
+
+Carry and bankroll should remain in stable locations through reward, preparation, shop, and finalization.
+
+## Structural layout rules
 
 - New major UI structure should use Godot Control and Container composition instead of multiplying fixed absolute positions.
 - Preserve 1280 × 720 as the current canonical prototype canvas.
 - Do not change stretch behavior merely to hide layout problems. Containerize the major regions first.
-- Keep hanafuda cards as the primary visual objects. Interface chrome must not compete with the card art.
-- Do not create a new panel for every piece of information. Prefer spatial grouping, trays, sheets, slots, and one clear table surface.
+- Keep hanafuda cards as the primary visual objects.
+- Prefer spatial grouping, trays, sheets, slots, and one clear table surface rather than a panel behind every datum.
 - Modifier offers must use a visual silhouette/material grammar distinct from hanafuda cards.
 
-### Theme and component foundation
+## Theme and reusable components
 
-Create a lightweight project Theme and reusable semantic components before reward/shop implementation.
+Create a lightweight project Theme and reusable semantic components.
 
-Initial semantic roles should cover:
+High-value components include:
 
-- table / inset / raised / overlay surfaces;
-- primary / secondary / muted text;
-- subtle / strong / focus borders;
-- selectable / selected / disabled / invalid / warning states;
-- economy gain / loss;
-- active / reserve / locked carry states;
-- the three modifier families.
-
-High-value reusable components:
-
-- HanafudaCardView or the existing MoonCardView evolved into that role;
+- existing MoonCardView evolved into the reusable hanafuda-card role;
 - ModifierCard;
 - CarrySlot;
 - InspectPanel;
@@ -72,331 +475,528 @@ High-value reusable components:
 - MoonRuleDisplay;
 - YakuSummary where the current gameplay UI touches it.
 
-Do not prematurely lock final hues, exact corner radii, or decorative materials in this milestone.
+Do not prematurely lock final hues/materials in this milestone.
 
-### Input and focus architecture
+## Input and focus
 
-The primary interaction grammar should be:
+Canonical interaction grammar:
 
 **focus/select → inspect if needed → choose target/destination → commit**
 
-- Mouse hover and drag may accelerate interaction but must never be required.
-- Click-select-click / focus-select-destination is the canonical carry interaction.
-- Pointer, keyboard, and controller paths should invoke the same semantic commands.
-- Do not bind gameplay mechanics directly to Godot's built-in focus-navigation actions.
-- Make playable card controls focusable. Remove FOCUS_NONE as the interaction policy for MoonCardView.
-- Define explicit focus neighbors for hands, offer grids, carry rows, reserve rows, and decision surfaces where automatic focus guessing is ambiguous.
-- After phase changes, rerolls, purchases, sales, swaps, or dialogs, restore focus deliberately with a defined destination.
-- Every hover tooltip must have an equivalent focus/inspect path.
+- hover and drag are accelerators only;
+- click-select-click / focus-select-destination is canonical for carry movement;
+- all input methods submit the same semantic RunAction/GameAction;
+- make MoonCardView focusable rather than relying on FOCUS_NONE;
+- define explicit focus neighbors where geometry is ambiguous;
+- restore focus deliberately after mutations;
+- every hover tooltip needs a focus/inspect path.
 
-### Readability and accessibility baseline
+## Readability/accessibility
 
-- Raise meaningful UI text out of the current 9–10 px range.
-- Prototype target: roughly 14–16 px for body/mechanical text, 16–18 px for actions/important values, and 12–14 px only for genuinely secondary metadata.
-- Verify actual rendered size at 1280 × 720 rather than treating the Godot font-size number as certification.
-- Never communicate a gameplay state by color alone.
-- Focus should use a clear border/shape/weight change, not glow alone.
-- Keep reduced-motion behavior centralized through the presentation timing system.
-- No essential information may exist only as a transient animation or audio cue.
-- Add accessibility names/descriptions to reusable semantic controls as they are created.
-- Keep layouts localization-resilient: wrapping labels, content-sized buttons, translatable complete phrases, and periodic pseudolocalization checks.
+- meaningful body/mechanical text should generally target roughly 14–16 px at the 1280 × 720 prototype scale;
+- important actions/values roughly 16–18 px;
+- 12–14 px only for genuinely secondary metadata;
+- verify rendered results rather than treating the integer font size as certification;
+- state cannot rely on color alone;
+- focus uses a clear border/shape/weight cue, not glow alone;
+- reduced-motion handling remains centralized;
+- reusable semantic controls receive accessibility names/descriptions;
+- new layouts remain localization-resilient.
 
-### Current January UX debt to clear before the interface surface grows
+## January UX debt to clear before surface area grows
 
-These are not new gameplay rules. They are presentation corrections that become more expensive if deferred.
-
-- Replace the full-screen, heavily dimmed Stop / Koi-Koi modal with a context-preserving decision tray so the table and public opponent information remain readable.
-- Keep current score, relevant yaku progress, known Koi-Koi consequences, and opponent public threats accessible during that decision.
-- Retain current legal-target assistance but evolve it toward stable selection/focus outlines rather than broad dimming or constant glow.
-- Preserve hanafuda artwork as the dominant card identity. Helper marks should live at the perimeter and remain optional.
-- Keep Japanese hanafuda terms consistent and provide English support rather than alternating among multiple player-facing names for the same class.
-
-**Authority status:** UX implementation direction from research. No gameplay-rule authority changes are created by this section.
+- Replace the heavily dimmed full-screen Stop/Koi-Koi modal with a context-preserving decision tray.
+- Keep current score, relevant yaku progress, exact known Koi-Koi consequences, and public opponent threats accessible.
+- Retain legal-target assistance but favor stable selection/focus outlines over broad dimming or constant glow.
+- Preserve hanafuda artwork as dominant card identity.
+- Keep Japanese terms consistent with English support.
 
 ---
 
-## 1. Money + January Settlement
+# 4. Money + January Settlement + Liquidation
 
-Build the economic handoff from the completed January result into the run state.
+Build the first run action bridge from completed January into persistent run state.
 
-- Start the solo prototype with the current **20 currency** baseline.
-- Use resolved hanafuda/yaku score as the core money scale.
-- A winning result adds the resolved score.
-- A losing result subtracts the resolved score.
-- Koi-Koi and other score multipliers affect the economic result through the final resolved score.
+## Settlement
+
+- Start with the current **20 currency** prototype baseline.
+- Use final resolved hanafuda score as the economic scale.
+- A win adds the resolved score.
+- A loss owes the resolved score.
+- Koi-Koi and other score multipliers enter the economy only through the final resolved score.
 - Spending down to 0 is legal.
-- If a settlement debt cannot be covered, allow the authority-defined emergency-liquidation step before bankruptcy.
-- Settlement should appear as a readable ledger or sheet attached to the current table context rather than as an unrelated result dashboard.
-- Present the scoring/economic chain in one causal direction:
-  1. yaku;
-  2. Moon/additive adjustments;
-  3. multipliers;
-  4. final resolved score;
-  5. economic result;
-  6. bankroll.
-- Animate/reveal one causal step at a time. Do not animate every row simultaneously.
-- Keep the bankroll visible from settlement forward, with the delta shown locally when it changes.
+- The settlement is calculated by run-domain rules from MatchResult, not by UI.
 
-**Authority status:** APPROVED PROTOTYPE BASELINE / still subject to playtesting.
+The settlement presentation should reveal:
 
-**Expansion later:** exact bankruptcy presentation, liquidation UX, economy telemetry, and tuning.
+1. yaku;
+2. Moon/additive adjustments;
+3. multipliers;
+4. final resolved score;
+5. economic result;
+6. bankroll.
 
----
+## Emergency liquidation
 
-## 2. Unlock the First Carry Slot
+Liquidation is a distinct authoritative run phase.
 
-Introduce the primary roguelike build capacity immediately after January settlement.
+Do **not** make canonical bankroll negative and ask UI to repair it.
 
-- Completing January unlocks **active carry slot #1**.
-- Carry capacity ultimately reaches 8 active slots.
-- One normal active slot unlocks after each completed month through August.
-- Show the full eventual eight-slot active tray from the first between-month sequence.
-- Locked future slots remain physically visible and unmistakably unavailable.
-- Reveal slot #1 changing from locked to available **before** the player sees the free reward choice.
-- Use placement + slot form + lock state, not color alone, to communicate locked versus available.
-- Keep slot-unlock feedback short and causal. Do not add a separate congratulations dialog.
-- This step should establish the underlying run-state representation for active carry capacity without implementing later-month progression yet.
+If a loss is payable immediately:
 
-**Authority status:** LOCKED.
+- subtract the amount once;
+- clear settlement;
+- continue.
 
-**Prototype presentation values still adjustable:** exact slot dimensions, spacing, unlock timing, and ornament.
+If the loss cannot yet be covered:
 
----
+- keep bankroll nonnegative;
+- create PendingSettlement;
+- enter LIQUIDATION;
+- disallow normal reward/shop spending;
+- permit only legal liquidation actions.
 
-## 3. Free Reward Choice
+When legal sales raise enough to cover the debt, pay the debt once and continue.
 
-Add the dependable build-growth layer that occurs after every completed month.
+If no legal remaining assets can satisfy the debt, transition to BANKRUPT.
 
-- Present **3 free modifier offers**.
-- Player chooses **1**.
-- Player may refuse the reward set and take the current working **+2 currency** alternative.
-- Losing January must still grant the normal reward opportunity. Loss affects economic position, not access to basic build growth.
-- Reward generation should use the approved modifier pool rather than inventing a new relic/item system.
-- Reward offers appear in the shared preparation shell while the carry tray and bankroll remain visible.
-- Modifier offers must look materially different from hanafuda cards.
-- Each normal offer should prioritize:
-  - family;
-  - name;
-  - one concise mechanical sentence;
-  - target/requirement if needed;
-  - FREE.
-- Focus/inspect should reveal fuller rule text without permanently printing long paragraphs on every offer.
-- The cash refusal must be explicit, such as **Take +2 currency**, not hidden under a vague Skip action.
-- If a reward requires choosing a hanafuda target, enter a clear target-selection mode using the same legal-target grammar as gameplay.
-- Before commitment, show the destination or replacement consequence when one is required.
-- Acquisition should visibly move the chosen modifier into the carry/reserve system so ownership is spatially clear.
+The exact resale value of free rewards and other unresolved sale rules remain design decisions and must not be invented here.
 
-### Authority conflict to resolve before implementation
-
-The current authority contains two instructions that should not be silently reconciled:
-
-- **Carry Build / LOCKED:** three reward offers are drawn from the full modifier pool and do **not** need to contain one from each family.
-- **Solo Reward and Economy Baseline / APPROVED PROTOTYPE BASELINE:** present one Card Upgrade, one Hand/Mechanic Modifier, and one Strategic/Meta Modifier.
-
-Before implementation, explicitly decide which prototype rule supersedes the other and update the canonical authority accordingly.
-
-**Expansion later:** reward-generation weighting, duplicate handling, rarity if any, deeper comparison logic, and final art treatment.
+**Authority status:** economy sequence follows the approved prototype baseline; final tuning/resale details remain provisional or unresolved as stated in the Game Design Authority.
 
 ---
 
-## 4. Carry-Build Preparation
+# 5. Carry Capacity + Authoritative Modifier Placement
 
-Carry management is part of the shared preparation table, not a disconnected inventory screen.
+After a successfully resolved January settlement:
 
-- Keep all 8 eventual active slots visible.
-- After January, only active slot #1 is normally unlocked.
-- Show the reserve/bank as a separate named storage region.
-- Current working reserve recommendation: **4 reserve slots**.
-- Reserve modifiers have no effect while inactive.
-- Allow active/reserve rearrangement only during the between-month management phase unless a specific approved modifier says otherwise.
-- Make active, reserve, locked, empty, selected, disabled, ready, and used states distinguishable by structure and symbols, not opacity/color alone.
-- Primary operation:
-  - select source modifier;
-  - show valid destinations;
-  - select destination;
-  - commit the move.
-- Optional drag-and-drop may call the same underlying move command, but drag must never be required.
-- Selling must be an explicit action. Dragging an item out of the tray must not mean sell.
-- A move should be represented internally by one source-of-truth command such as move_modifier(source, destination), independent of input method.
-- Keep this system centered on the three approved functional modifier families:
-  - Card Upgrades
-  - Hand/Mechanic Modifiers
-  - Strategic/Meta Modifiers
+- unlock active carry slot #1;
+- one normal slot unlocks per completed month through August;
+- active maximum remains 8.
 
-**Authority status:** active carry system LOCKED; 4-slot reserve is WORKING INITIAL.
+RunState must authoritatively own:
 
-**Do not build yet:** sorting/filtering systems, radial menus, separate inventory/loadout screens, advanced collection browsing, or unlimited reserve storage.
+- unlocked active capacity;
+- active modifier instance IDs;
+- reserve modifier instance IDs;
+- card-upgrade attachments;
+- any explicit pending-acquisition state if that design is used.
 
----
+The UI should show all eight eventual active positions from the first between-month sequence, with future positions visibly locked.
 
-## 5. Minimal Six-Offer Shop
+Current working reserve recommendation remains **4 slots**.
 
-Implement the first functional between-month shop after the free reward choice.
+Movement must be a RunAction, conceptually:
 
-Initial shop map:
+`MOVE_MODIFIER(source, destination)`
 
-1. **Card Upgrade**
-2. **Hand/Mechanic Modifier**
-3. **Strategic/Meta Modifier**
-4. **Wildcard modifier**
-5. **Wildcard modifier**
-6. **Service / special item / economy / slot-access / other nonstandard opportunity**
+and must validate capacity/location invariants atomically.
 
-### Shop presentation
-
-- Reuse the shared offer region rather than changing to a new environment.
-- Keep bankroll, active carry, reserve, and phase position visible.
-- Use a **3 × 2 offer grid** at the current 1280 × 720 prototype target.
-- Keep sold offer tiles spatially stable and mark them SOLD rather than collapsing/reflowing the grid.
-- Keep unaffordable offers visible and state the shortfall directly, such as **Need 3 more**.
-- Focusing an offer should update a stable inspect/compare area rather than spawning a modal.
-- Mechanical prose should be left-aligned and concise.
-
-### Core shop actions
-
-- Buy.
-- Sell where allowed.
-- Reroll the full shop.
-- Manage active and reserve modifiers.
-- Leave/finalize the shop.
-
-### Purchase and capacity behavior
-
-Recommended UX direction, subject to the eventual inventory command contract:
-
-- If reserve has room, purchase may land there by default, followed by an optional Equip action.
-- If an active slot is empty, offer Equip now rather than forcing a destination dialog before every purchase.
-- If both active and reserve capacity are full, resolve replacement/sale requirements **before** deducting currency.
-- Never silently reject a legal-looking purchase.
-- Routine purchases should not receive generic Are you sure? dialogs. Confirm only unusual destructive actions.
-
-### Reroll baseline
-
-- First reroll: **1 currency**
-- Second reroll: **2 currency**
-- No third reroll in the same shop.
-
-- Rerolls should preserve the six offer-slot categories instead of becoming an unrestricted search for any exact effect.
-- Show the current reroll price before commitment.
-- If the next reroll cost is deterministic, show it before the player commits the current one.
-- Restore focus predictably after reroll, purchase, sale, or offer removal.
-
-**Authority status:** shop direction LOCKED; exact prices, rarity distribution, service contents, and some inventory details remain prototype values.
-
-**Expansion later:** price tuning, rarity if needed, services, liquidation UX, Rain Check behavior, offer persistence, and economy telemetry.
+Selling is a separate explicit action, never an accidental drag-out behavior.
 
 ---
 
-## 6. Wire a Small Representative Modifier Set
+# 6. Reward Request, Generation, and Selection
 
-Do **not** implement the entire approved modifier catalogue immediately.
+The reward system is authoritative run state, not a UI list generated on open.
 
-First prove that all three modifier families can operate cleanly through the deterministic rules engine and the new between-month flow.
+## Shared deterministic generator
 
-Recommended first implementation set:
+Use one deterministic offer generator driven by a declarative RewardRequest.
 
-### Card Upgrades
-- **Chaff Point Upgrade**
-- **Sweep**
+A request specifies at least:
 
-### Hand/Mechanic Modifiers
-- **Mulligan**
-- **Second Draw**
+- month;
+- choice count;
+- slot/category specifications;
+- exclusions;
+- duplicate policy;
+- source/provenance.
 
-### Strategic/Meta Modifiers
-- **Quad Koi**
-- **Wider Choice**
+Both currently competing reward models must use the same generator architecture.
 
-These effects are already part of the approved prototype modifier direction. The purpose of this initial subset is architectural coverage, not final balance.
+Whole-pool model:
 
-The first six should prove:
+```text
+ANY_MODIFIER
+ANY_MODIFIER
+ANY_MODIFIER
+```
 
-- an upgrade attached to an existing one-of-48 game card;
-- a card upgrade that changes capture behavior;
-- a pre-month hand-management decision;
-- a draw-manipulation decision during play;
-- a Stop/Koi-Koi economic/risk modifier;
-- a reward-system modifier that changes the between-month layer.
+Family-guaranteed model:
 
-Modifier UI requirements:
+```text
+CARD_UPGRADE
+HAND_MECHANIC
+STRATEGIC_META
+```
 
-- family is communicated by icon/shape/pattern plus text support, not color alone;
-- full modifier text is available through focus/inspect;
-- card upgrades preserve the original hanafuda card identity and use a standardized peripheral upgrade seal/frame;
-- triggering feedback scales with importance and frequency;
-- frequent modifier triggers must remain quieter than yaku completion, Koi-Koi, slot unlock, or month completion.
+The architecture must support both without choosing between them.
 
-**Authority status:** APPROVED PROTOTYPE DIRECTION.
+Generated offers are stored in RewardState and must not change when the UI is reopened.
 
-**Expansion later:** remaining approved modifiers, pricing, AI awareness, interactions, safeguards, balance, and final names/art.
+Each offer should have a stable ID and provenance.
+
+## Wider Choice
+
+**Wider Choice is the one representative modifier to implement end-to-end during this milestone.**
+
+It should transform a RewardRequest:
+
+`choice_count: 3 → 4`
+
+before deterministic generation.
+
+It must not be hard-coded inside RewardGenerator.
+
+The category/policy of the fourth slot under the family-guaranteed reward model is unresolved and must be explicitly decided before that configuration can use Wider Choice.
+
+## Selection/refusal
+
+Use RunActions equivalent to:
+
+- CHOOSE_REWARD;
+- REFUSE_REWARD;
+- PLACE_PENDING_ACQUISITION where required.
+
+The cash refusal remains the current working **+2 currency** value.
+
+A reward can be selected/refused exactly once.
+
+If a chosen reward cannot immediately fit because storage is full, do not secretly overflow capacity. The final placement/replacement policy is a design decision; a pending-acquisition state is an acceptable engineering representation if that policy requires a later placement resolution.
+
+## Presentation
+
+- carry and bankroll remain visible;
+- modifiers do not visually masquerade as hanafuda;
+- offer copy is concise/mechanical first;
+- full detail is available through focus/inspect;
+- cash refusal is explicit;
+- target selection uses the same stable legal-target grammar as gameplay;
+- acquisition visibly moves to its authoritative destination only after commit.
 
 ---
 
-## 7. Finalize Build + February Placeholder
+# 7. Carry-Build Preparation
 
-Create a deliberate end state for the between-month sequence.
+Carry management remains part of the shared preparation environment, not a disconnected inventory screen.
 
-- Keep the finalized active build, reserve count, and remaining bankroll visible.
-- Use the exact action copy **Begin February** rather than a generic Continue.
-- Immediately near the final action, summarize:
-  - active slots used/unlocked;
-  - reserve count;
-  - bankroll;
-  - February / Snow Moon identity and rule if that rule has been approved by then.
-- If the prepared build contains no unresolved invalid state, one press should finalize.
-- Do not add a second confirmation dialog merely because the phase is ending.
-- Transition into a February Moon banner / placeholder that preserves the same visual grammar.
-- Reduced-motion mode must reach the same stable end state without relying on flourish.
-- Stop at the placeholder for this milestone.
+Primary interaction:
+
+1. select source modifier;
+2. show legal destinations;
+3. select destination;
+4. submit MOVE_MODIFIER;
+5. render the committed state.
+
+Optional drag-and-drop may call the same action path.
+
+Active, reserve, locked, empty, selected, disabled, ready, and used states should be redundantly legible through placement/form/symbols rather than color or opacity alone.
+
+Do not build sorting/filtering, radial menus, generic inventory abstractions, or unlimited storage.
 
 ---
 
-# Cross-Cutting UX Rules for This Milestone
+# 8. Six-Offer Shop as Authoritative State
 
-These rules apply across settlement, reward, carry, shop, and finalization.
+ShopState contains the actual persistent offers.
 
-## Information hierarchy
+Initial slot specifications remain:
 
-Use this priority:
+1. Card Upgrade
+2. Hand/Mechanic Modifier
+3. Strategic/Meta Modifier
+4. Wildcard modifier
+5. Wildcard modifier
+6. Service / special / economy / slot-access / other bounded nonstandard opportunity
 
-**physical objects → current choice → immediate consequences → persistent run state → explanation → decoration**
+Wildcard is a slot-eligibility rule, not a new modifier family.
 
-If hiding a fact could plausibly change the current decision, it must remain available without leaving the current decision context.
+The sixth slot does not justify a generic item/inventory system.
 
-## Feedback hierarchy
+## Shop actions
 
-- Minor: focus, hover, ordinary selection.
-- Moderate: purchase, modifier trigger, currency change.
-- Major: yaku completion, Koi-Koi, slot unlock, month completion.
-- Exceptional: reserved for later run-defining events such as December completion.
+Use atomic RunActions equivalent to:
 
-Frequency and spectacle should be inversely related.
+- ENTER_SHOP;
+- BUY_OFFER;
+- SELL_MODIFIER;
+- REROLL_SHOP;
+- MOVE_MODIFIER;
+- EXIT_SHOP.
 
-## Copy rules
+Buying must validate, before commit:
 
-Prefer exact actions:
+- correct phase;
+- offer exists and is not consumed;
+- quoted price is authoritative/current;
+- sufficient bankroll;
+- definition/service is legal;
+- target is legal if required;
+- destination/capacity rules are satisfied under the approved inventory policy.
 
-- Take
-- Equip
-- Sell for X
-- Reroll X
-- Stop
-- Koi-Koi
-- Begin February
+Only then deduct currency and materialize the result.
 
-Avoid vague filler such as Continue Journey, Manage Your Modifiers, Insufficient Funds, or generic Confirm when a mechanical verb can be shown instead.
+Rejected purchases change nothing.
 
-## Anti-slop constraints
+## Rerolls
 
-- No generic dark-dashboard layer replacing the tabletop.
-- No glow as the default indicator for every interactive or special state.
-- No rounded panel around every label.
-- No unrelated icon styles per feature.
-- No modifier cards that visually masquerade as hanafuda.
-- No repeated decorative badges without semantic meaning.
-- No centered multiline mechanical paragraphs.
-- No idle particles or shine sweeps behind routine menus unless they communicate an actual state change.
-- No heavyweight card framework replacement. Reuse the current deterministic/presentation foundation and study external patterns narrowly.
+Current baseline:
+
+- first reroll: **1 currency**;
+- second reroll: **2 currency**;
+- no third reroll.
+
+Reroll price schedule belongs in configuration.
+
+Each reroll derives its own deterministic RNG scope.
+
+Rerolls preserve the six stored slot specifications.
+
+Sold/consumed tiles remain stable in the UI instead of causing a geometry reshuffle.
+
+## Presentation
+
+- use a 3 × 2 offer grid at 1280 × 720;
+- keep bankroll, carry, reserve, and phase orientation visible;
+- unaffordable offers remain visible with a direct shortfall explanation;
+- focus updates a stable inspect/compare area;
+- routine purchase should not use generic confirmation dialogs;
+- focus return after buy/sell/reroll is explicitly defined.
+
+**Authority status:** shop direction follows the approved prototype baseline; exact prices, rarity, services, resale formulas, and full-inventory policy remain configurable/unresolved where the Design Authority says so.
+
+---
+
+# 9. Match-Side Modifier Seams, Not Full Modifier Content
+
+Do **not** implement the entire six-modifier representative set end-to-end as part of the between-month milestone.
+
+The milestone must establish the correct seams and tests so later implementations do not become special cases.
+
+Required seams:
+
+## Chaff Point Upgrade
+
+Structured score output must be able to identify contributing card IDs and accept an additive card-upgrade bonus without changing the Kasu threshold count.
+
+## Sweep
+
+Capture resolution must be able to produce a base CapturePlan, apply card-owned capture augmentation, validate physical-card conservation, then commit.
+
+## Mulligan
+
+Future implementation must use an explicit opening-decision phase and legal action, not an animation/coroutine callback.
+
+**Do not implement until the exact returned-card/shuffle procedure is explicitly approved.**
+
+## Second Draw
+
+Future implementation must use an explicit draw-reveal decision phase between reveal and resolution.
+
+**Do not implement until legality with one/no remaining draw cards is explicitly approved.**
+
+## Quad Koi
+
+Scoring must expose a named `koi_koi_multiplier` replacement seam so Quad Koi replaces x2 with x4 rather than multiplying by another x2.
+
+## Wider Choice
+
+Implement now through the run-layer RewardRequest transformation described above.
+
+The architecture must make reserve modifiers inert and Card Upgrades follow stable physical card IDs.
+
+---
+
+# 10. Save/Load, Determinism, and Debug Acceptance Infrastructure
+
+Before declaring the between-month milestone complete, build the tools that prevent repeated manual January playthroughs and make failures reproducible.
+
+## Save/load tests
+
+Round-trip every between-month phase:
+
+- liquidation;
+- reward;
+- pending acquisition if used;
+- carry;
+- shop;
+- finalize/transition.
+
+Save/load continuation must match uninterrupted continuation in canonical hash and outcomes.
+
+## Determinism tests
+
+At minimum:
+
+- same root seed + same actions = same canonical state/hash;
+- different RNG subsystem scopes do not affect each other;
+- rejected actions preserve hash;
+- generated offers persist after reopening/reloading;
+- rerolls are deterministic and category-preserving;
+- replay of run actions reproduces the same run hash;
+- stable sorting/IDs provide total deterministic ordering.
+
+## Scenario/debug harness
+
+Build a deterministic DebugScenarioFactory or equivalent that constructs fully valid states such as:
+
+- January terminal win at selected score;
+- January terminal loss;
+- liquidation required;
+- reward phase;
+- full/partial carry configurations;
+- initial shop;
+- shop after first/second reroll;
+- bankruptcy edge case;
+- February placeholder.
+
+Scenario states must pass production invariants.
+
+Legal debug operations should use normal controller actions.
+
+Do not create cheats that manually mutate twenty private fields or move card Nodes as if they were authority.
+
+High-value debug inspection:
+
+- root seed;
+- run phase/hash;
+- bankroll/capacities;
+- current RNG scope/derived seed;
+- active/reserve/card attachments;
+- reward/shop offer IDs and categories;
+- match hash/card locations;
+- accepted action journal and resulting hashes.
+
+Keep fast/instant/reduced presentation modes so domain iteration does not require waiting for animation.
+
+---
+
+# 11. Between-Month UI Flow
+
+Only after the underlying run transactions exist should the UI be wired to them.
+
+The UI must contain no direct authoritative mutation such as:
+
+- `currency += ...`;
+- direct active/reserve array edits;
+- direct offer removal;
+- direct modifier materialization;
+- reroll generation;
+- settlement calculation.
+
+It submits actions and renders committed state.
+
+The player-facing progression remains:
+
+**Settlement → Slot Unlock → Reward → Prepare → Shop → Begin February**
+
+The shared preparation shell should make those phases feel spatially continuous even though RunState explicitly records the current legal phase.
+
+---
+
+# 12. Finalize Build + February Placeholder
+
+Create the final deterministic transition for the milestone.
+
+Use a RunAction equivalent to:
+
+`FINALIZE_BUILD`
+
+then transition to the February placeholder through authoritative run state.
+
+Show:
+
+- active slots used/unlocked;
+- reserve count;
+- bankroll;
+- February / Snow Moon identity;
+- February rule only if that rule has been explicitly approved by then.
+
+Use the exact action copy **Begin February** rather than generic Continue.
+
+No ritual second confirmation is needed if the build is valid.
+
+The placeholder must inherit the finalized bankroll/build state and prove that a save/reload at the boundary reproduces the same run state.
+
+---
+
+# Cross-Cutting Determinism Rules
+
+These rules apply to every implementation in the milestone.
+
+- No authoritative gameplay progression in `_process()`, `_physics_process()`, Timer, Tween, or animation completion.
+- No unresolved rule decision may live only in suspended coroutine control flow.
+- No global gameplay RNG.
+- No UI callback mutates authority directly.
+- No mutable shared Resource holds per-run authority.
+- No scene-tree order, dictionary incidental order, filesystem enumeration order, Object instance ID, or RID may decide gameplay.
+- Sort semantically unordered collections before logic that depends on order.
+- Use total deterministic tie-breaks with stable IDs.
+- Avoid floating-point for money, score, counts, and integer-weighted decisions where integers suffice.
+- Signals observe successful commits; they do not secretly mutate canonical state.
+- Generated offers are authoritative state, not presentation output.
+- Rejected transactions leave state unchanged.
+- Accepted transactions run invariants before commit.
+- Every pending decision can be serialized.
+- Reserve effects never project as active.
+- Card Upgrades never create a 49th physical card.
+- AI retains the current public-information boundary.
+- Telemetry, when added, observes committed immutable domain events and cannot feed back into rules.
+
+---
+
+# Architecture Review Gate for AI-Assisted Contributions
+
+Before accepting generated code, verify:
+
+- all authoritative mutation still passes through MatchController or RunController;
+- no second copy of currency/card location/offer state/modifier placement was created;
+- modifier IDs are not being special-cased throughout unrelated systems;
+- no authoritative random call bypasses scoped RNG;
+- UI is not calculating settlement, price, legality, or score;
+- animation/timing does not determine game state;
+- no unnecessary Autoload or broad `*Manager` layer was introduced;
+- new abstractions solve a concrete current/imminent need;
+- scoring/capture/pricing/eligibility logic is not duplicated;
+- stable IDs are centralized and validated;
+- invalid content fails loudly in tests;
+- transactions cannot partially mutate canonical state;
+- new authoritative fields are serialized/migrated or explicitly transient;
+- effect hook/stage/priority/ownership is explicit;
+- reserve modifiers cannot trigger;
+- Card Upgrades preserve one physical card;
+- AI gains no hidden information;
+- player decisions are replayable actions;
+- pending decisions survive save/load;
+- core/run/modifier code does not import UI;
+- required invariant/interaction tests accompany the behavior;
+- the patch extends the current authoritative path instead of creating a parallel implementation.
+
+The standing engineering rule is:
+
+> **No new feature gets a private path around authoritative state.**
+
+---
+
+# Design Decisions Still Requiring Explicit Approval
+
+Do not silently answer these while implementing architecture:
+
+- reward model: three from the full pool vs one per family;
+- Wider Choice's fourth slot/category under a family-quota reward model;
+- Mulligan return/shuffle procedure;
+- Second Draw behavior with one/no remaining draw cards;
+- modifier duplicate/stacking policy;
+- whether multiple Card Upgrades may stack on one physical card;
+- whether Card Upgrade reward/shop targets are fixed during generation or player-selected;
+- selected-reward behavior when both active and reserve storage are full;
+- shop-purchase behavior when storage is full;
+- exact resale formula/eligibility, including free reward modifiers;
+- whether voluntary bankruptcy is allowed;
+- game-rule behavior for legitimately conflicting replacement effects.
+
+Architecture may expose explicit policy/configuration fields for these decisions. It may not choose the values.
 
 ---
 
@@ -404,54 +1004,89 @@ Avoid vague filler such as Continue Journey, Manage Your Modifiers, Insufficient
 
 The first complete implementation should allow this exact flow:
 
-1. Play and finish January.
-2. Resolve January score.
-3. Transform the result into a readable settlement ledger without losing table continuity.
-4. Apply the currency settlement.
-5. If required, handle emergency liquidation before bankruptcy.
-6. Show the eight-slot carry tray and unlock active carry slot #1.
-7. Present the free reward choice or cash refusal while carry and bankroll remain visible.
-8. Acquire the chosen modifier into a legal carry/reserve destination.
-9. Rearrange active/reserve state through select → destination interaction.
-10. Enter the six-offer shop in the same preparation environment.
-11. Buy, sell, reroll, inspect, compare, and rearrange the carry build.
-12. Finalize the build.
-13. Reach a clear **Begin February** transition.
-14. Stop at a February placeholder rather than implementing February gameplay.
+1. Play and finish January through the existing MatchController.
+2. Produce a terminal MatchResult.
+3. Submit RESOLVE_MONTH to RunController.
+4. Resolve January settlement exactly once.
+5. If required, enter authoritative liquidation without making bankroll negative.
+6. Resolve debt or bankruptcy through legal run actions.
+7. Unlock active carry slot #1.
+8. Generate and persist the free reward set from a deterministic RewardRequest.
+9. Choose one reward or take the configured cash refusal.
+10. Resolve legal placement into active/reserve/pending-acquisition state.
+11. Rearrange the build through RunActions.
+12. Generate and persist the six-offer shop.
+13. Buy, sell, reroll, inspect, compare, and rearrange without direct UI mutation.
+14. Finalize the build.
+15. Save/reload successfully from between-month states.
+16. Reach a deterministic **Begin February** transition.
+17. Stop at a February placeholder.
 
 The acceptance pass must also prove:
 
-- all major between-month actions can be completed without mouse-only hover or required drag;
-- focus remains visible and predictable after state mutations;
+- rejected run actions preserve the state hash;
+- same root seed + action sequence reproduces the same run state;
+- reward/shop generation is isolated from unrelated RNG calls;
+- offer sets do not regenerate on UI reopen;
+- all modifier instances have one legal authoritative location;
+- reserve modifiers do not apply effects;
+- the player can complete all major UI actions without required hover/drag;
+- focus remains visible/predictable;
 - no essential state relies on color alone;
-- meaningful mechanical text is readable at the 1280 × 720 target;
-- new structural UI does not depend primarily on hard-coded absolute positions;
-- reward, carry, and shop feel like phases of one environment rather than separate apps;
-- the player can explain where money changed, where a reward went, which modifiers are active, what is in reserve, what a shop action will cost, and what crosses into February.
+- structural UI is not primarily hard-coded absolute positions;
+- the player can explain where money changed, where a reward went, what is active/reserved, what a shop action costs, and what crosses into February.
 
 ---
 
 # Development Order
 
-Do not parallelize these systems blindly. Build them in dependency order:
+Do not parallelize these systems blindly.
 
-1. Semantic Theme/tokens, readable typography baseline, focusable-control policy, inspect/tooltip equivalence, and shared input-action grammar.
-2. Shared PhaseShell / preparation-table environment plus the visible eight-slot CarryTray and reserve region.
-3. Refactor the current January Stop/Koi-Koi decision into a context-preserving tray and remove the most expensive focus/layout debt where touched.
-4. Run money state and January settlement ledger.
-5. Carry-slot unlock state and presentation.
-6. ModifierCard / OfferGrid / InspectPanel foundations and reward selection.
-7. Active/reserve carry-state commands and focus topology.
-8. Shop inventory, transactions, 3 × 2 grid, rerolls, sell flow, and capacity-error handling.
-9. Representative modifier execution.
-10. Finalization summary and February placeholder.
-11. End-to-end playtest with mouse, keyboard/controller focus path, reduced motion, and pseudolocalization stress.
+## Domain/architecture order
 
-The player-facing progression remains:
+1. Document the run/match authority boundary, RunAction philosophy, phases, RNG scope model, and invariants.
+2. Add RunState serialization, canonical hash, invariants, root seed, prototype configuration, and phases.
+3. Add RunAction / RunActionResult / RunController with copy-validate-commit and replay journal.
+4. Add MatchResult bridge and duplicate-settlement protection.
+5. Implement settlement and PendingSettlement.
+6. Implement authoritative liquidation/bankruptcy phase.
+7. Implement carry capacity, modifier instance locations, and slot unlock.
+8. Add ModifierDefinition / ModifierInstance / registry / handler validation.
+9. Extend headless content validation.
+10. Add deterministic RNG-scope derivation and offer-generation primitives.
+11. Add RewardRequest / RewardState / deterministic reward generator supporting both unresolved reward policies.
+12. Implement Wider Choice through RewardRequest transformation.
+13. Implement reward select/refuse and legal acquisition placement state.
+14. Implement MOVE_MODIFIER and carry-management transactions.
+15. Add ShopState / ShopOffer / deterministic six-slot shop generator.
+16. Implement BUY_OFFER / SELL_MODIFIER / REROLL_SHOP atomically.
+17. Implement versioned JSON save v1 and migration harness.
+18. Add deterministic DebugScenarioFactory and run-state inspector hooks.
+19. Add the match-side modifier seams for capture/score/draw/opening/multiplier domains without implementing unresolved modifier behavior.
+20. Expand run determinism, replay, save-continuation, and seed-sweep tests.
 
-**Settlement → Slot Unlock → Reward → Prepare → Shop → Begin February**
+## UI order
 
-The engineering order intentionally establishes shared layout, focus, carry, and component rules before the reward/shop surfaces can invent incompatible conventions.
+The reusable Theme, focus policy, semantic controls, and PhaseShell may be developed once the corresponding state/action contracts are stable, but UI must not invent temporary domain rules to get ahead of them.
+
+Then wire:
+
+1. settlement/liquidation;
+2. slot unlock/carry tray;
+3. reward;
+4. carry preparation;
+5. shop;
+6. finalization;
+7. February placeholder.
+
+Finally run end-to-end tests with:
+
+- normal/fast/reduced motion;
+- mouse;
+- keyboard/controller focus path;
+- save/reload at each major phase;
+- pseudolocalization stress;
+- deterministic replay.
 
 ---
 
@@ -459,23 +1094,48 @@ The engineering order intentionally establishes shared layout, focus, carry, and
 
 Do not expand this milestone into:
 
-- a tutorial campaign;
-- a giant glossary or encyclopedia;
+- February gameplay;
+- all twelve Moon effects;
+- the full approved modifier catalogue;
+- Cloudflare multiplayer backend;
+- matchmaking/accounts;
+- Steam networking;
+- TypeScript duplicate rules engine;
+- cross-language PRNG implementation;
+- generic ability DSL;
+- universal event/message bus;
+- ECS;
+- dependency-injection/service-locator framework;
+- statechart plugin;
+- database;
+- generic item/inventory framework;
+- modding/plugin SDK;
+- full House Rules infrastructure;
+- production cloud telemetry provider;
+- analytics dashboard;
+- cloud saves;
+- save encryption/compression;
+- replay-video viewer;
+- sophisticated AI search;
+- tutorial campaign;
+- giant glossary/encyclopedia;
 - separate Inventory / Loadout / Relics / Upgrades / Collection screens;
-- advanced modifier search/filter/sort;
-- touch-specific layouts or gesture-only controls;
+- touch-specific layout;
 - rich 3D binder/card physics;
-- multiple shop categories/tabs;
+- multiple shop tabs;
 - Moon-specific structural UI layouts;
-- elaborate shopkeepers;
-- deep run history, achievements, codex progression, or meta-progression;
-- final color/material locking before the broader art direction is ready;
-- predictive odds / best-move advice;
-- a heavyweight replacement card framework;
-- February gameplay or a large modifier catalogue.
+- final art palette/material locking;
+- predictive best-move/odds advice;
+- heavyweight replacement card framework.
 
-The primary design question for this milestone is:
+After the run loop is stable, useful next infrastructure includes a headless SimulationRunner, simple policy agents, and provider-neutral telemetry sinks. Those should consume the same controllers/actions, not create alternate rule paths.
+
+The primary milestone question remains:
 
 > Does finishing a hanafuda month and immediately making clear, tactile build/economy decisions in the same tabletop world create a compelling roguelike loop worth repeating across twelve Moons?
 
-Do not expand into additional Moon gameplay until this loop is understandable, navigable, and fun enough to justify more content.
+The technical acceptance question is equally important:
+
+> Can the same run state be replayed, saved, loaded, tested, and eventually validated remotely without creating a second source of truth?
+
+Do not expand into additional Moon gameplay until both answers are strong enough to justify more content.

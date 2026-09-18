@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.0-prototype.8 — Deterministic Run Architecture Map
+
+- Rework `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` around a separate deterministic `RunState` / `RunController` authority while preserving the existing `GameState` / `MatchController` match authority.
+- Add a serializable `MatchResult` bridge, explicit run phases, copy-validate-commit run transactions, canonical run hashing/invariants, and stable string IDs as prerequisites for settlement, rewards, carry, and shop systems.
+- Require one root run seed with hashed subsystem RNG scopes, persisted generated offers, isolated presentation randomness, and deterministic offer/shop generation that cannot be perturbed by unrelated random calls.
+- Define modifier definitions, persistent instances, stable physical-card attachments, typed effect domains, deterministic priority/replacement semantics, reserve inactivity, and validation against modifier-ID special-case leakage.
+- Move emergency liquidation into an authoritative run phase that keeps canonical bankroll nonnegative and resolves debt through legal transactions before reward progression.
+- Make reward and shop offers authoritative persisted state, with atomic buy/sell/reroll/move actions and Wider Choice as the only representative modifier required end-to-end for the between-month milestone.
+- Add versioned JSON save v1, migration hooks, content validation, deterministic scenario/debug tooling, replay/save-continuation tests, and an AI-assisted architecture review gate to the milestone.
+- Preserve all prior table-first UX requirements and all unresolved gameplay-rule questions; this documentation pass does not choose reward-family policy, modifier stacking, resale rules, Mulligan shuffle semantics, Second Draw edge cases, or full-storage behavior.
+- No January hanafuda rules, canonical scoring values, approved economy values, modifier effects, or renderer behavior are changed by this documentation pass.
+
 ## v0.2.0-prototype.7 — Between-Month UX Architecture Map
 
 - Revise `docs/BETWEEN_MONTH_DEVELOPMENT_MAP.md` around the research-backed table-first UX direction while preserving the Game Design Authority as the source of gameplay rules.
