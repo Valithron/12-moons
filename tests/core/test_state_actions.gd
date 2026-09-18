@@ -5,13 +5,14 @@ var catalog: CardCatalog
 func before() -> void:
 	catalog = CardCatalog.new()
 
-func _state_for(hand_ids: Array, field_ids: Array, next_draw_id: String = "") -> GameState:
+func _state_for(hand_ids: Array, field_ids: Array, next_draw_id: String = "", house_hand_ids: Array = []) -> GameState:
 	var state := GameState.new()
 	state.seed = 77
 	var used: Dictionary = {}
 	var consumed: Array = []
 	consumed.append_array(hand_ids)
 	consumed.append_array(field_ids)
+	consumed.append_array(house_hand_ids)
 	for card_id in consumed:
 		used[String(card_id)] = true
 	var remaining: Array = []
@@ -27,6 +28,7 @@ func _state_for(hand_ids: Array, field_ids: Array, next_draw_id: String = "") ->
 	state.deck.draw_index = consumed.size()
 	state.players = [PlayerState.new(0), PlayerState.new(1)]
 	state.players[0].hand_ids = hand_ids.duplicate()
+	state.players[1].hand_ids = house_hand_ids.duplicate()
 	state.field_ids = field_ids.duplicate()
 	state.phase = GameState.PHASE_HAND_PLAY
 	return state
@@ -110,7 +112,8 @@ func test_accepted_action_completes_hand_and_draw_before_passing_turn() -> void:
 	var state := _state_for(
 		["m01_pine_january_crane", "m02_plum_february_chaff_a"],
 		["m01_pine_january_poetry_ribbon"],
-		"m03_cherry_march_chaff_a"
+		"m03_cherry_march_chaff_a",
+		["m04_wisteria_april_chaff_a"]
 	)
 	var controller := MatchController.new(state.seed, catalog, state)
 	var action := GameAction.new(GameAction.PLAY_CARD, 0, "m01_pine_january_crane", "m01_pine_january_poetry_ribbon")
@@ -118,7 +121,7 @@ func test_accepted_action_completes_hand_and_draw_before_passing_turn() -> void:
 	assert_bool(result.accepted).is_true()
 	assert_int(controller.state.players[0].hand_ids.size()).is_equal(1)
 	assert_int(controller.state.players[0].captured_ids.size()).is_equal(2)
-	assert_str(controller.state.last_event.get("source", "")).is_equal("draw")
+	assert_bool(String(controller.state.last_event.get("source", "")) == "draw").is_true()
 	assert_int(controller.state.turn_index).is_equal(1)
 	assert_int(controller.state.current_player).is_equal(1)
 	assert_bool(controller.state.invariants_ok(catalog)).is_true()

@@ -16,7 +16,7 @@ func test_full_january_autoplay_is_legal_and_replayable() -> void:
 	var controller := MatchController.new(202601, catalog)
 	controller.begin_january(202601)
 	assert_bool(controller.state.invariants_ok(catalog)).is_true()
-	var starter_action := controller.legal_actions(0)[0]
+	var starter_action: GameAction = controller.legal_actions(0)[0]
 	assert_bool(controller.submit_action(starter_action).accepted).is_true()
 	while controller.advance_automatic():
 		pass

@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.0-prototype.3 — Godot 4.7.2 Runtime Stability
+
+- Defer UI screen teardown so title, January intro, match, and result transitions do not free a locked signal-emitting node.
+- Fix Godot 4.7.2 parser/type-inference errors in the match capture-group renderer and test suites.
+- Normalize `project.godot` to the Godot 4.7 configuration format.
+- Add a headless end-to-end UI-flow validation covering title, intro, January, and result screens.
+- January gameplay rules are unchanged.
+
 ## v0.2.0-prototype.2 — Godot 4.7 Launch Fix
 
 - Fix Godot 4.7.2 parser/type-inference errors in `boot.gd` when dynamically instantiated scenes are assigned with inferred `:=` declarations.

@@ -13,8 +13,8 @@ using the standard 48-card deck and recognizable Koi-Koi matching.
   read the Wolf Moon introduction, select a starter card, and play through the
   month on the table.
 - Test: run `scripts/run/validate_project.ps1 -GodotBinary <path-to-godot>`.
-  The script validates the manifest and then invokes the vendored GdUnit4
-  runner for `tests/`.
+  The script validates the manifest, runs the headless title-to-result UI flow,
+  and then invokes the vendored GdUnit4 runner for `tests/`.
 
 ## January prototype
 

@@ -50,7 +50,7 @@ func test_starting_player_ceremony_uses_three_unique_months_and_earlier_revealed
 		var definition := catalog.get_card(String(card_id))
 		months[definition.month] = true
 	assert_int(months.size()).is_equal(3)
-	var selected := controller.legal_actions(0)[0]
+	var selected: GameAction = controller.legal_actions(0)[0]
 	var selected_definition := catalog.get_card(selected.card_id)
 	assert_bool(controller.submit_action(selected).accepted).is_true()
 	assert_str(controller.state.phase).is_equal(GameState.PHASE_STARTER_AI_REVEAL)

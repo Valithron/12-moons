@@ -175,10 +175,10 @@ func _render_capture_groups(parent: Node, captured_ids: Array, origin: Vector2, 
 			grouped[definition.base_class].append(card_id)
 	var classes := ["bright", "animal", "ribbon", "chaff"]
 	for class_index in range(classes.size()):
-		var class_name := classes[class_index]
-		var ids: Array = grouped[class_name]
+		var group_name: String = String(classes[class_index])
+		var ids: Array = grouped[group_name]
 		var group_origin := origin + Vector2(class_index * 51, 20)
-		_add_label(parent, class_name.to_upper(), group_origin, Vector2(50, 14), 8, Color(0.70, 0.78, 0.84), HORIZONTAL_ALIGNMENT_CENTER)
+		_add_label(parent, group_name.to_upper(), group_origin, Vector2(50, 14), 8, Color(0.70, 0.78, 0.84), HORIZONTAL_ALIGNMENT_CENTER)
 		for card_index in range(ids.size()):
 			var row := int(card_index / 4)
 			var column := card_index % 4

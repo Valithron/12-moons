@@ -7,8 +7,11 @@ func _ready() -> void:
 	_show_title()
 
 func _clear_screen() -> void:
-	if screen != null:
-		screen.free()
+	if is_instance_valid(screen):
+		# Screen transitions can be triggered from a Button.pressed signal on
+		# the screen being replaced. Freeing that node synchronously while its
+		# signal is still being emitted causes Godot's "locked object" error.
+		screen.queue_free()
 	screen = null
 
 func _show_title() -> void:
@@ -32,7 +35,7 @@ func _show_title() -> void:
 	start.add_theme_font_size_override("font_size", 22)
 	start.pressed.connect(_show_january_intro)
 	root.add_child(start)
-	_add_label(root, "Prototype 0.2.0", Vector2(0, 470), Vector2(960, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(root, "Prototype 0.2.0-prototype.3", Vector2(0, 470), Vector2(960, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
 
 func _show_january_intro() -> void:
 	_clear_screen()
