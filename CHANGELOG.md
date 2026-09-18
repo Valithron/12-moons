@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.0-prototype.2 — Between-Month Shop Layout Fix
+
+- Keep the SHOP offer and owned-modifier content inside a bounded vertical scroll region so large inventories cannot push required controls below the viewport.
+- Keep REROLL SHOP and CONTINUE TO FINALIZE in a persistent footer, with an explanatory disabled state if the authoritative six-slot shop is incomplete.
+- Add a 1280×720 overflow regression test covering bounded content, visible progression, and authoritative transition to FINALIZE.
+- Validate the repository with Godot 4.7.2: 119/119 GdUnit4 cases across 21 suites.
+
 ## v0.3.0-prototype.1 — January-to-February Between-Month Milestone
 
 - Complete the authoritative January → settlement/liquidation → reward → carry

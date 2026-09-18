@@ -188,3 +188,39 @@ func test_salvage_screen_exposes_base_value_action_and_removes_owned_modifier() 
 	assert_bool(controller.state.modifier_instances.has("target")).is_false()
 	assert_int(controller.state.bankroll).is_equal(22)
 	screen.queue_free()
+
+func test_shop_overflow_is_bounded_and_continue_to_finalize_stays_visible() -> void:
+	var controller := DebugScenarioFactory.create_controller("initial_shop", 1717)
+	controller.state.unlocked_active_capacity = 8
+	for index in range(8):
+		var instance_id := "overflow_modifier_%d" % index
+		controller.state.modifier_instances[instance_id] = {
+			"instance_id": instance_id,
+			"definition_id": "wider_choice",
+			"location": "active",
+			"source": "scenario",
+			"attached_card_ids": [],
+			"base_shop_price": 4
+		}
+		controller.state.active_modifier_ids.append(instance_id)
+	var screen: Node = load("res://scenes/between_month/between_month.tscn").instantiate()
+	add_child(screen)
+	screen.configure(controller)
+	await get_tree().process_frame
+	var shop_scroll: ScrollContainer = screen.get("shop_scroll")
+	var shop_content: VBoxContainer = screen.get("shop_content_column")
+	var action_bar: HBoxContainer = screen.get("shop_action_bar")
+	var continue_button := _find_button(screen, "CONTINUE TO FINALIZE")
+	assert_object(shop_scroll).is_not_null()
+	assert_object(shop_content).is_not_null()
+	assert_object(action_bar).is_not_null()
+	assert_object(continue_button).is_not_null()
+	assert_bool(shop_content.size.y > shop_scroll.size.y).is_true()
+	assert_bool(action_bar.position.y + action_bar.size.y <= screen.size.y).is_true()
+	assert_bool(continue_button.visible).is_true()
+	assert_bool(continue_button.disabled).is_false()
+	assert_object(_find_button(screen, "REROLL SHOP")).is_not_null()
+	continue_button.emit_signal("pressed")
+	await get_tree().process_frame
+	assert_str(controller.state.phase).is_equal(RunState.PHASE_FINALIZE)
+	screen.queue_free()

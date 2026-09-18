@@ -6,6 +6,9 @@ var run_controller: RunController
 var match_result: MatchResult
 var root_column: VBoxContainer
 var content_column: VBoxContainer
+var shop_content_column: VBoxContainer
+var shop_scroll: ScrollContainer
+var shop_action_bar: HBoxContainer
 var status_label: Label
 var focus_key: String = ""
 
@@ -144,14 +147,28 @@ func _render_phase() -> void:
 func _render_shop() -> void:
 	var shop := ShopState.from_dict(run_controller.state.shop_state)
 	status_label.text = _last_event_message("Offers persist until purchased or rerolled. Routine transactions stay quiet and keep the carry tray visible.")
+	shop_scroll = ScrollContainer.new()
+	shop_scroll.name = "ShopContentScroll"
+	shop_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	shop_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shop_scroll.custom_minimum_size = Vector2(0, 180)
+	shop_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	shop_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	content_column.add_child(shop_scroll)
+	shop_content_column = VBoxContainer.new()
+	shop_content_column.name = "ShopScrollableContent"
+	shop_content_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shop_content_column.add_theme_constant_override("separation", 10)
+	shop_scroll.add_child(shop_content_column)
 	var grid := GridContainer.new()
+	grid.name = "ShopOfferGrid"
 	grid.columns = 3
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
 	var rain_check_active := run_controller.active_effect_seams().has(ModifierEffectRegistry.SEAM_SHOP_OFFER_PRESERVATION)
 	var preserved_offer_exists := not shop.preserved_offer.is_empty()
-	content_column.add_child(grid)
+	shop_content_column.add_child(grid)
 	for raw_offer in shop.offers:
 		var offer := ShopOffer.from_dict(raw_offer)
 		var offer_card := VBoxContainer.new()
@@ -175,11 +192,26 @@ func _render_shop() -> void:
 			preserve_button.pressed.connect(func(): _submit(RunAction.new(RunAction.PRESERVE_SHOP_OFFER, 0, {"offer_id": offer.offer_id}), preserve_key))
 			offer_card.add_child(preserve_button)
 		grid.add_child(offer_card)
-	_add_label(content_column, "OWNED MODIFIERS", 18, GOLD, false)
+	_add_label(shop_content_column, "OWNED MODIFIERS", 18, GOLD, false)
 	_render_shop_owned(run_controller.state.active_modifier_ids)
 	_render_shop_owned(run_controller.state.reserve_modifier_ids)
-	_add_action("REROLL SHOP", "reroll", RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": ""}))
-	_add_action("EXIT SHOP", "exit_shop", RunAction.new(RunAction.EXIT_SHOP))
+	_render_shop_action_bar(shop)
+
+func _render_shop_action_bar(shop: ShopState) -> void:
+	shop_action_bar = HBoxContainer.new()
+	shop_action_bar.name = "ShopActionBar"
+	shop_action_bar.custom_minimum_size = Vector2(0, 58)
+	shop_action_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	shop_action_bar.add_theme_constant_override("separation", 10)
+	root_column.add_child(shop_action_bar)
+	_add_action("REROLL SHOP", "reroll", RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": ""}), shop_action_bar, true)
+	var can_continue := shop.entered and shop.offers.size() == ShopState.SLOT_IDS.size()
+	var continue_button := _add_action("CONTINUE TO FINALIZE", "exit_shop", RunAction.new(RunAction.EXIT_SHOP), shop_action_bar, true)
+	continue_button.disabled = not can_continue
+	if not can_continue:
+		continue_button.tooltip_text = "The six shop slots are not ready yet."
+		status_label.text = "Shop state is incomplete. Resolve the six-slot shop before continuing to finalize."
+		status_label.add_theme_color_override("font_color", ERROR)
 
 func _render_liquidation() -> void:
 	for raw_instance_id in run_controller.state.active_modifier_ids + run_controller.state.reserve_modifier_ids:
@@ -206,7 +238,7 @@ func _render_shop_owned(instance_ids: Array) -> void:
 		sell_button.pressed.connect(func() -> void: _submit(action, action_key))
 		row.add_child(sell_button)
 		_add_salvage_button(row, instance_id)
-		content_column.add_child(row)
+		shop_content_column.add_child(row)
 		if focus_key == action_key:
 			sell_button.call_deferred("grab_focus")
 
@@ -284,16 +316,20 @@ func _last_event_message(fallback: String) -> String:
 	var message := String(run_controller.state.last_event.get("message", ""))
 	return message if not message.is_empty() else fallback
 
-func _add_action(text_value: String, key: String, action: RunAction) -> void:
+func _add_action(text_value: String, key: String, action: RunAction, parent: Node = null, expand_horizontal: bool = false) -> Button:
 	var button := Button.new()
 	button.name = "Action_%s" % key
 	button.text = text_value
 	button.custom_minimum_size = Vector2(0, 48)
+	if expand_horizontal:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_ALL
 	button.pressed.connect(func(): _submit(action, key))
-	content_column.add_child(button)
+	var target := content_column if parent == null else parent
+	target.add_child(button)
 	if focus_key == key:
 		button.call_deferred("grab_focus")
+	return button
 
 func _submit(action: RunAction, key: String = "") -> void:
 	focus_key = key
