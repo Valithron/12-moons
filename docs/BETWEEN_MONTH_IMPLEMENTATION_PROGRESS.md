@@ -18,7 +18,7 @@ production infrastructure required by the implementation plan.
 
 - Branch: `main`
 - Starting synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
-- Current committed implementation checkpoint: `88548a0` (release synchronization is the current working checkpoint)
+- Current committed implementation checkpoint: `f5260c9`
 - `VERSION`: `0.3.0-prototype.1`
 - `project.godot` version: `0.3.0-prototype.1`
 - Current implementation: deterministic January month, legal public-information
@@ -73,7 +73,7 @@ production infrastructure required by the implementation plan.
 | BM-15 | Preparation shell, settlement/reward/carry UI | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 8/8 between-month UI cases plus native exact-engine flow | 787a6a4 | — | Shared shell presents authoritative settlement, reward generation/selection, replacement/refusal, Salvage, and carry actions; native inspection confirmed causal copy and reward-to-carry continuity. |
 | BM-16 | Shop/finalization UI | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 8/8 between-month UI cases plus native exact-engine flow | 787a6a4 | — | Six category slots, sale, buy rejection, two rerolls, no third reroll, Rain Check preservation, and finalization controls were exercised; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2; native flow PASS | 88548a0 | — | Approved policy implementation, authored minimum reward content, exact-engine validation, and native visual acceptance are green; final release synchronization and architecture review remain. |
+| BM-18 | Final hardening and release gate | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2; native flow/title/version inspection PASS; `git diff --check` PASS | f5260c9 | — | Approved policy implementation, authored minimum reward content, exact-engine validation, native visual acceptance, release synchronization, and architecture review are complete. |
 
 ## Design blocker register
 
@@ -151,6 +151,7 @@ Append-only entries in the format:
 - 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — e579508
 - 2026-09-18 — exact-engine full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` — PASS — Godot 4.7.2 January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — working tree
 - 2026-09-18 — BM-14/BM-15/BM-16 native acceptance checkpoint — exact Godot 4.7.2 editor/runtime inspection — PASS — at 1280×720, exercised January intro, card play, Stop/Koi-Koi decision tray, result, settlement, reward generation/selection, carry, purchase, sale, first and second rerolls, rejected third reroll, Rain Check preservation, finalize, Begin February; maximized higher-resolution inspection showed centered letterboxing without overlap or clipping — working tree
+- 2026-09-18 — BM-18 release checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` plus native title inspection and `git diff --check` — PASS — release tree `0.3.0-prototype.1` has synchronized version surfaces, title version display, README/changelog scope, exact 4.7.2 validation with 118/118 cases, and no authored-content warning — f5260c9
 
 ## Known deferred work
 
