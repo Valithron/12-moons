@@ -11,6 +11,17 @@ func test_capture_plan_and_score_breakdown_preserve_physical_identity() -> void:
 	assert_int(score.final_score).is_equal(6)
 	assert_int(score.card_contributions["m01_pine_january_chaff_a"]).is_equal(1)
 
+func test_production_catalogue_has_three_real_reward_definitions_and_keeps_future_seams_separate() -> void:
+	var registry := ModifierRegistry.new()
+	var eligible := registry.eligible_reward_definition_ids()
+	assert_int(eligible.size()).is_equal(3)
+	assert_bool(eligible.has("wider_choice")).is_true()
+	assert_bool(eligible.has("salvage")).is_true()
+	assert_bool(eligible.has("rain_check")).is_true()
+	assert_str(registry.get_definition("salvage").source).is_not_equal("seam")
+	assert_str(registry.get_definition("rain_check").source).is_not_equal("seam")
+	assert_str(registry.get_definition("sweep_seam").source).is_equal("seam")
+
 func test_seam_registry_orders_handlers_and_rejects_conflicting_replacements() -> void:
 	var registry := ModifierEffectRegistry.new()
 	registry.register_handler(ModifierEffectRegistry.SEAM_CAPTURE_PLAN, "sweep", 20)

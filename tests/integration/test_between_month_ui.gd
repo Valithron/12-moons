@@ -126,3 +126,65 @@ func test_carry_screen_exposes_authoritative_move_action_and_restores_focus_key(
 	assert_array(controller.state.reserve_modifier_ids).is_equal(["carry_mod"])
 	assert_str(screen.get("focus_key")).is_equal("move_carry_mod_reserve")
 	screen.queue_free()
+
+func test_rain_check_screen_exposes_preserve_action_and_persists_selection() -> void:
+	var controller := RunController.new(1515)
+	controller.state.phase = RunState.PHASE_CARRY
+	controller.state.unlocked_active_capacity = 1
+	controller.state.modifier_instances["rain_effect"] = {
+		"instance_id": "rain_effect",
+		"definition_id": "rain_check",
+		"location": "active",
+		"source": "reward",
+		"attached_card_ids": []
+	}
+	controller.state.active_modifier_ids = ["rain_effect"]
+	var screen: Node = load("res://scenes/between_month/between_month.tscn").instantiate()
+	add_child(screen)
+	screen.configure(controller)
+	await get_tree().process_frame
+	var open_shop_button := _find_button(screen, "OPEN SIX-SLOT SHOP")
+	assert_object(open_shop_button).is_not_null()
+	open_shop_button.emit_signal("pressed")
+	await get_tree().process_frame
+	var preserve_button := _find_button(screen, "PRESERVE")
+	assert_object(preserve_button).is_not_null()
+	preserve_button.emit_signal("pressed")
+	await get_tree().process_frame
+	assert_bool(ShopState.from_dict(controller.state.shop_state).preserved_offer.is_empty()).is_false()
+	assert_str(screen.get("status_label").text).contains("preserved")
+	screen.queue_free()
+
+func test_salvage_screen_exposes_base_value_action_and_removes_owned_modifier() -> void:
+	var controller := RunController.new(1616)
+	controller.state.phase = RunState.PHASE_CARRY
+	controller.state.unlocked_active_capacity = 1
+	controller.state.modifier_instances["salvage_effect"] = {
+		"instance_id": "salvage_effect",
+		"definition_id": "salvage",
+		"location": "active",
+		"source": "reward",
+		"base_shop_price": 8,
+		"attached_card_ids": []
+	}
+	controller.state.modifier_instances["target"] = {
+		"instance_id": "target",
+		"definition_id": "wider_choice",
+		"location": "reserve",
+		"source": "reward",
+		"base_shop_price": 4,
+		"attached_card_ids": []
+	}
+	controller.state.active_modifier_ids = ["salvage_effect"]
+	controller.state.reserve_modifier_ids = ["target"]
+	var screen: Node = load("res://scenes/between_month/between_month.tscn").instantiate()
+	add_child(screen)
+	screen.configure(controller)
+	await get_tree().process_frame
+	var salvage_button := _find_button(screen, "SALVAGE (+$2)")
+	assert_object(salvage_button).is_not_null()
+	salvage_button.emit_signal("pressed")
+	await get_tree().process_frame
+	assert_bool(controller.state.modifier_instances.has("target")).is_false()
+	assert_int(controller.state.bankroll).is_equal(22)
+	screen.queue_free()

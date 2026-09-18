@@ -85,8 +85,10 @@ func _is_legal_action(action: RunAction) -> bool:
 			return state.phase == RunState.PHASE_CARRY or state.phase == RunState.PHASE_SHOP
 		RunAction.ENTER_SHOP:
 			return state.phase == RunState.PHASE_CARRY
-		RunAction.BUY_OFFER, RunAction.SELL_MODIFIER, RunAction.REROLL_SHOP, RunAction.EXIT_SHOP:
+		RunAction.BUY_OFFER, RunAction.SELL_MODIFIER, RunAction.PRESERVE_SHOP_OFFER, RunAction.REROLL_SHOP, RunAction.EXIT_SHOP:
 			return state.phase == RunState.PHASE_SHOP
+		RunAction.SALVAGE_MODIFIER:
+			return state.phase == RunState.PHASE_CARRY or state.phase == RunState.PHASE_SHOP
 		RunAction.FINALIZE_BUILD:
 			return state.phase == RunState.PHASE_FINALIZE
 		RunAction.BEGIN_FEBRUARY:
@@ -121,6 +123,10 @@ func _apply_action(candidate: RunState, action: RunAction) -> Dictionary:
 			return _apply_buy_offer(candidate, action)
 		RunAction.SELL_MODIFIER:
 			return _apply_sell_modifier(candidate, action)
+		RunAction.SALVAGE_MODIFIER:
+			return _apply_salvage_modifier(candidate, action)
+		RunAction.PRESERVE_SHOP_OFFER:
+			return _apply_preserve_shop_offer(candidate, action)
 		RunAction.REROLL_SHOP:
 			return _apply_reroll_shop(candidate, action)
 		RunAction.EXIT_SHOP:
@@ -360,6 +366,12 @@ func _active_has_definition(candidate: RunState, definition_id: String) -> bool:
 		if raw_instance is Dictionary and String(raw_instance.get("definition_id", "")) == definition_id:
 			return true
 	return false
+
+func active_effect_seams() -> Array:
+	return ModifierEffectRegistry.new().active_effect_seams(state, modifier_registry)
+
+func _active_has_effect_seam(candidate: RunState, seam_id: String) -> bool:
+	return ModifierEffectRegistry.new().active_effect_seams(candidate, modifier_registry).has(seam_id)
 
 func _owned_nonstackable_definition_ids(candidate: RunState) -> Array:
 	var result: Array = []
@@ -646,12 +658,14 @@ func _apply_enter_shop(candidate: RunState, action: RunAction) -> Dictionary:
 	var duplicate_policy := String(action.payload.get("duplicate_policy", ""))
 	if duplicate_policy.is_empty():
 		duplicate_policy = candidate.rules().duplicate_modifier_policy
-	var generated := ShopGenerator.generate(candidate.month, 0, candidate.root_seed, modifier_registry, duplicate_policy, _owned_nonstackable_definition_ids(candidate))
+	var previous_shop := ShopState.from_dict(candidate.shop_state)
+	var generated := ShopGenerator.generate(candidate.month, 0, candidate.root_seed, modifier_registry, duplicate_policy, _owned_nonstackable_definition_ids(candidate), previous_shop.preserved_offer)
 	if not bool(generated.get("ok", false)):
 		return generated
 	var raw_shop = generated.get("state", {})
 	var shop := ShopState.from_dict(raw_shop if raw_shop is Dictionary else {})
 	shop.entered = true
+	shop.preserved_offer = {}
 	candidate.shop_state = shop.to_dict()
 	candidate.generation_counters["shop"] = shop.generation_id
 	candidate.phase = RunState.PHASE_SHOP
@@ -720,6 +734,55 @@ func _apply_sell_modifier(candidate: RunState, action: RunAction) -> Dictionary:
 	}
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
+func _apply_salvage_modifier(candidate: RunState, action: RunAction) -> Dictionary:
+	if not _active_has_effect_seam(candidate, ModifierEffectRegistry.SEAM_SALVAGE_TRANSACTION):
+		return {"ok": false, "reason": "Salvage is not active in the authoritative build"}
+	var instance_id := String(action.payload.get("instance_id", ""))
+	if instance_id.is_empty() or not candidate.modifier_instances.has(instance_id):
+		return {"ok": false, "reason": "Modifier instance is not owned"}
+	if not candidate.active_modifier_ids.has(instance_id) and not candidate.reserve_modifier_ids.has(instance_id):
+		return {"ok": false, "reason": "Modifier instance has no legal carry location"}
+	var instance: Dictionary = candidate.modifier_instances[instance_id]
+	var proceeds := ModifierResalePolicy.salvage_quote(instance, modifier_registry)
+	if proceeds < 0:
+		return {"ok": false, "reason": "Modifier is not currently salvageable"}
+	_remove_modifier(candidate, instance_id)
+	candidate.bankroll += proceeds
+	candidate.last_event = {
+		"kind": "modifier_salvaged",
+		"instance_id": instance_id,
+		"proceeds": proceeds,
+		"bankroll": candidate.bankroll,
+		"message": "Modifier permanently discarded for half its base shop value."
+	}
+	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
+
+func _apply_preserve_shop_offer(candidate: RunState, action: RunAction) -> Dictionary:
+	if not _active_has_effect_seam(candidate, ModifierEffectRegistry.SEAM_SHOP_OFFER_PRESERVATION):
+		return {"ok": false, "reason": "Rain Check is not active in the authoritative build"}
+	var shop := ShopState.from_dict(candidate.shop_state)
+	if not shop.preserved_offer.is_empty():
+		return {"ok": false, "reason": "A shop offer is already preserved for the next month"}
+	var offer_id := String(action.payload.get("offer_id", ""))
+	var offer_index := _shop_offer_index(shop.offers, offer_id)
+	if offer_index < 0:
+		return {"ok": false, "reason": "Shop offer does not exist"}
+	var offer := ShopOffer.from_dict(shop.offers[offer_index])
+	if not offer.available or offer.consumed or offer.definition_id.is_empty():
+		return {"ok": false, "reason": "Only an unpurchased available offer can be preserved"}
+	offer.available = false
+	offer.preserved = true
+	shop.offers[offer_index] = offer.to_dict()
+	shop.preserved_offer = offer.to_dict()
+	candidate.shop_state = shop.to_dict()
+	candidate.last_event = {
+		"kind": "shop_offer_preserved",
+		"offer_id": offer.offer_id,
+		"definition_id": offer.definition_id,
+		"message": "One unpurchased shop offer is preserved for next month."
+	}
+	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
+
 func _apply_reroll_shop(candidate: RunState, action: RunAction) -> Dictionary:
 	var shop := ShopState.from_dict(candidate.shop_state)
 	var costs := candidate.rules().shop_reroll_costs
@@ -738,6 +801,7 @@ func _apply_reroll_shop(candidate: RunState, action: RunAction) -> Dictionary:
 	var next_shop := ShopState.from_dict(generated.get("state", {}))
 	next_shop.entered = true
 	next_shop.reroll_count = shop.reroll_count + 1
+	next_shop.preserved_offer = shop.preserved_offer.duplicate(true)
 	candidate.bankroll -= cost
 	candidate.shop_state = next_shop.to_dict()
 	candidate.generation_counters["shop"] = next_generation

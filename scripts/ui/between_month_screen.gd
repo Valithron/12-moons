@@ -149,17 +149,32 @@ func _render_shop() -> void:
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 10)
 	grid.add_theme_constant_override("v_separation", 10)
+	var rain_check_active := run_controller.active_effect_seams().has(ModifierEffectRegistry.SEAM_SHOP_OFFER_PRESERVATION)
+	var preserved_offer_exists := not shop.preserved_offer.is_empty()
 	content_column.add_child(grid)
 	for raw_offer in shop.offers:
 		var offer := ShopOffer.from_dict(raw_offer)
+		var offer_card := VBoxContainer.new()
+		offer_card.add_theme_constant_override("separation", 4)
 		var button := Button.new()
 		button.name = "Shop_%s" % offer.slot_id
-		button.text = "%s\n%s\n%s" % [offer.slot_id.to_upper().replace("_", " "), offer.definition_id if offer.available else "UNAVAILABLE", ("$%d" % offer.price) if offer.available else "content pending"]
+		var offer_status := "PRESERVED FOR NEXT MONTH" if offer.preserved else (offer.definition_id if offer.available else "UNAVAILABLE")
+		button.text = "%s\n%s\n%s" % [offer.slot_id.to_upper().replace("_", " "), offer_status, ("$%d" % offer.price) if offer.available else "content pending"]
 		button.custom_minimum_size = Vector2(0, 84)
 		button.disabled = not offer.available or offer.consumed
 		button.focus_mode = Control.FOCUS_ALL
 		button.pressed.connect(func(): _submit(RunAction.new(RunAction.BUY_OFFER, 0, {"offer_id": offer.offer_id}), "shop_%s" % offer.offer_id))
-		grid.add_child(button)
+		offer_card.add_child(button)
+		if rain_check_active and not preserved_offer_exists and offer.available and not offer.consumed:
+			var preserve_button := Button.new()
+			preserve_button.name = "Preserve_%s" % offer.slot_id
+			preserve_button.text = "PRESERVE"
+			preserve_button.custom_minimum_size = Vector2(0, 36)
+			preserve_button.focus_mode = Control.FOCUS_ALL
+			var preserve_key := "preserve_%s" % offer.offer_id
+			preserve_button.pressed.connect(func(): _submit(RunAction.new(RunAction.PRESERVE_SHOP_OFFER, 0, {"offer_id": offer.offer_id}), preserve_key))
+			offer_card.add_child(preserve_button)
+		grid.add_child(offer_card)
 	_add_label(content_column, "OWNED MODIFIERS", 18, GOLD, false)
 	_render_shop_owned(run_controller.state.active_modifier_ids)
 	_render_shop_owned(run_controller.state.reserve_modifier_ids)
@@ -190,6 +205,7 @@ func _render_shop_owned(instance_ids: Array) -> void:
 		var action := RunAction.new(RunAction.SELL_MODIFIER, 0, {"instance_id": instance_id})
 		sell_button.pressed.connect(func() -> void: _submit(action, action_key))
 		row.add_child(sell_button)
+		_add_salvage_button(row, instance_id)
 		content_column.add_child(row)
 		if focus_key == action_key:
 			sell_button.call_deferred("grab_focus")
@@ -230,9 +246,28 @@ func _render_modifier_location(instance_ids: Array, destination: String) -> void
 		var action := RunAction.new(RunAction.MOVE_MODIFIER, 0, {"instance_id": instance_id, "destination": destination})
 		move_button.pressed.connect(func() -> void: _submit(action, action_key))
 		row.add_child(move_button)
+		_add_salvage_button(row, instance_id)
 		content_column.add_child(row)
 		if focus_key == action_key:
 			move_button.call_deferred("grab_focus")
+
+func _add_salvage_button(row: HBoxContainer, instance_id: String) -> void:
+	if not run_controller.active_effect_seams().has(ModifierEffectRegistry.SEAM_SALVAGE_TRANSACTION):
+		return
+	var instance: Dictionary = run_controller.state.modifier_instances.get(instance_id, {})
+	var proceeds := ModifierResalePolicy.salvage_quote(instance, run_controller.modifier_registry)
+	if proceeds < 0:
+		return
+	var action_key := "salvage_%s" % instance_id
+	var salvage_button := Button.new()
+	salvage_button.text = "SALVAGE (+$%d)" % proceeds
+	salvage_button.custom_minimum_size = Vector2(170, 42)
+	salvage_button.focus_mode = Control.FOCUS_ALL
+	var action := RunAction.new(RunAction.SALVAGE_MODIFIER, 0, {"instance_id": instance_id})
+	salvage_button.pressed.connect(func() -> void: _submit(action, action_key))
+	row.add_child(salvage_button)
+	if focus_key == action_key:
+		salvage_button.call_deferred("grab_focus")
 
 func _modifier_description(instance_id: String) -> String:
 	var raw_instance = run_controller.state.modifier_instances.get(instance_id, {})

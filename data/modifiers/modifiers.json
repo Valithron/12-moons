@@ -16,6 +16,34 @@
       "base_shop_price": 4
     },
     {
+      "id": "salvage",
+      "display_name": "Salvage",
+      "family": "service",
+      "description": "Permanently discard one modifier from the active build or reserve to refund half its base shop value, rounded down.",
+      "source": "reward",
+      "tags": ["carry_management", "economy"],
+      "effect_seams": ["salvage_transaction"],
+      "is_free_reward": true,
+      "sellable": true,
+      "stackable": false,
+      "allow_same_card_stack": false,
+      "base_shop_price": 4
+    },
+    {
+      "id": "rain_check",
+      "display_name": "Rain Check",
+      "family": "service",
+      "description": "Preserve one unpurchased shop offer so it returns in the next month's shop.",
+      "source": "reward",
+      "tags": ["shop_management"],
+      "effect_seams": ["shop_offer_preservation"],
+      "is_free_reward": true,
+      "sellable": true,
+      "stackable": false,
+      "allow_same_card_stack": false,
+      "base_shop_price": 4
+    },
+    {
       "id": "chaff_point_upgrade_seam",
       "display_name": "Chaff Point Upgrade (Seam)",
       "family": "card_upgrade",

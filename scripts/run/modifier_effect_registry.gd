@@ -7,6 +7,8 @@ const SEAM_SCORE_BREAKDOWN := "score_breakdown"
 const SEAM_OPENING_DECISION := "opening_decision"
 const SEAM_DRAW_REVEAL_DECISION := "draw_reveal_decision"
 const SEAM_MULTIPLIER_REPLACEMENT := "multiplier_replacement"
+const SEAM_SALVAGE_TRANSACTION := "salvage_transaction"
+const SEAM_SHOP_OFFER_PRESERVATION := "shop_offer_preservation"
 
 var handlers: Dictionary = {}
 var replacement_claims: Dictionary = {}

@@ -452,22 +452,29 @@ content validation.
 
 **Deliverables:** `RewardRequest`, `RewardState`, offer IDs/provenance,
 deterministic generator supporting both policy shapes, Wider Choice transformation
-from 3 to 4.
+from 3 to 4, and the three approved non-seam prototype reward definitions
+(`wider_choice`, `salvage`, and `rain_check`).
 
 **Authority boundaries:** generated offers are authoritative state; UI only
 displays stored offers.
 
 **Required behavior:** stable candidate order, persisted generated offers,
-configured duplicate/exclusion policy, Wider Choice changes only choice count.
+configured duplicate/exclusion policy, Wider Choice changes only choice count,
+and a fresh production registry can resolve three unique whole-pool offers
+without promoting deferred seam entries.
 
 **Presentation/UX:** offers are face-up and comparable; no loot-box reveal.
 
 **Tests:** both request shapes, same-seed determinism, reopen persistence,
-exclusions, duplicate policy, 3→4 transformation, RNG isolation.
+exclusions, duplicate policy, 3→4 transformation, RNG isolation, production
+catalogue eligibility, Salvage atomicity/base-value refund, and Rain Check
+offer persistence across save/load and next-month generation.
 
 **Validation:** targeted reward/determinism tests plus full validator.
 
-**Acceptance:** reward UI reopening cannot regenerate or reorder offers.
+**Acceptance:** reward UI reopening cannot regenerate or reorder offers; the
+production registry generates three persisted offers and the two approved
+service rewards execute through authoritative actions when active.
 
 **Architecture gates:** G2, G3, G5, G6.
 
@@ -653,14 +660,18 @@ persisted reopen behavior, eligibility/content validation.
 
 **Existing systems to reuse:** `RunController`, carry actions, configured rules.
 
-**Deliverables:** `ENTER_SHOP`, `BUY_OFFER`, `SELL_MODIFIER`, `REROLL_SHOP`,
-`EXIT_SHOP`; reroll costs `[1, 2]`; no third reroll; category-preserving refill.
+**Deliverables:** `ENTER_SHOP`, `BUY_OFFER`, `SELL_MODIFIER`,
+`SALVAGE_MODIFIER`, `PRESERVE_SHOP_OFFER`, `REROLL_SHOP`, `EXIT_SHOP`; reroll
+costs `[1, 2]`; no third reroll; category-preserving refill; persisted Rain
+Check offer carry-forward and active-only Salvage.
 
 **Authority boundaries:** validation precedes currency deduction, materialization,
 sale, or offer consumption.
 
 **Required behavior:** exact payment/proceeds once, stable consumed tiles,
-capacity and affordability errors, deterministic reroll scopes.
+capacity and affordability errors, deterministic reroll scopes, one preserved
+offer maximum, next-month slot-preserving return, and Salvage refunds based on
+base shop value rather than paid price.
 
 **Presentation/UX:** purchase/sale/re-roll are fast and quiet; no generic
 confirmation dialog; focus remains predictable.

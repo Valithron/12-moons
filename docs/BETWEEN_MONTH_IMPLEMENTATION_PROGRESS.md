@@ -41,11 +41,10 @@ production infrastructure required by the implementation plan.
   environment; the full suite is currently provisional under Godot 4.7.1.
 - `UX-BM-01` — native CUA inspection did not expose an interactive Godot/native
   surface, so visual acceptance remains a human/environment check.
-- `CONTENT-BM-01` — the production manifest currently contains one eligible
-  non-seam reward definition (`wider_choice`). The approved default needs three
-  persisted offers; synthetic registries prove the domain path, while authored
-  content is required before fresh production reward generation can be accepted.
-  Seam entries remain excluded and must not be promoted merely to fill offers.
+- `CONTENT-BM-01` — RESOLVED by the validated addition of the two canonical
+  non-seam service definitions (`salvage` and `rain_check`). The production
+  registry now contains three eligible definitions and fresh whole-pool reward
+  generation produces three persisted offers without promoting seam entries.
 
 ## Milestone table
 
@@ -58,18 +57,18 @@ production infrastructure required by the implementation plan.
 | BM-04 | Settlement, liquidation, bankruptcy | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, settlement/liquidation/bankruptcy and authoritative resale cases | 317d11b | ENV-BM-01 for final release gate | Shared `ModifierResalePolicy` now drives emergency liquidation and exact-zero/debt outcomes without injected production quotes. |
 | BM-05 | Modifier definitions, instances, capacity, placement | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 5 targeted cases | merged main | BM-B08 for later authored multi-upgrade behavior | Registry, locations, capacities, reserve inactivity, and attachment-index invariants are implemented; duplicate-definition policy is now approved. |
 | BM-06 | Typed modifier seams and content validation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 3 targeted cases | 317d11b | Later seams only | Wider Choice is real; future modifier behavior remains seams only. |
-| BM-07 | Reward generation and Wider Choice | IN PROGRESS | 2026-09-18 | — | PASS, reward suite and full suite 110/110 under Godot 4.7.1 | 317d11b | CONTENT-BM-01, ENV-BM-01 | Approved defaults, full-pool 3 offers, Wider Choice 4 offers, exclusion, persistence, and deterministic generation are wired; production authored content is still insufficient for a fresh three-offer run. |
+| BM-07 | Reward generation and Wider Choice | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, reward/seam/shop suites and full suite 116/116 under Godot 4.7.1 | pending checkpoint commit | ENV-BM-01 | Approved defaults, full-pool 3 offers, Wider Choice 4 offers, exclusion, persistence, deterministic generation, and three canonical non-seam definitions are wired. |
 | BM-08 | Reward selection/refusal/acquisition | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, pending replacement/refusal, atomic rejection, save/replay cases | 317d11b | BM-B07 only if real Card Upgrade targeting is introduced | Full-capacity reward replacement sells through the shared resale authority, or refusal grants +2; no overflow inventory exists. |
 | BM-09 | Carry management transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, carry/attachment cases | 317d11b | BM-B08 for later multi-type attachment policy | Active/reserve movement and one-instance/one-physical-card attachment are authoritative; later different-type stacking remains a seam. |
 | BM-10 | Save format v1 and migration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | 317d11b | — | Checksummed envelope, migration fixture, journal, and phase round-trips pass. |
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | 317d11b | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | 317d11b | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
-| BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll cases | 317d11b | ENV-BM-01 for final release gate | Full storage blocks purchase without consuming currency/offer; sale uses the same authoritative resale policy. |
+| BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll, Salvage, and Rain Check cases | pending checkpoint commit | ENV-BM-01 for final release gate | Full storage blocks purchase without consuming currency/offer; sale and Salvage use explicit shared economy rules; preserved offers persist and return in the next generated month slot. |
 | BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 9 card-motion cases | 851ae10 | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; all tested motion modes converge on the same card state; full visual acceptance remains. |
-| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, updated between-month UI suite under Godot 4.7.1 | 317d11b | CONTENT-BM-01, UX-BM-01 | Shared shell now presents authoritative liquidation quotes and full-capacity replacement/refusal actions; native visual acceptance remains. |
-| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, updated integration/UI coverage under Godot 4.7.1 | 317d11b | CONTENT-BM-01, UX-BM-01 | Six category slots, sale, buy rejection, reroll, and finalization controls are wired; unavailable content stays explicit. |
+| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | pending checkpoint commit | UX-BM-01 | Shared shell presents authoritative liquidation, replacement/refusal, Salvage, and carry actions; native visual acceptance remains. |
+| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | pending checkpoint commit | UX-BM-01 | Six category slots, sale, buy rejection, reroll, Rain Check preservation, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 111/111 across 21 suites under Godot 4.7.1 | 851ae10 | ENV-BM-01, UX-BM-01, CONTENT-BM-01 | Approved policy implementation is green under the available engine; exact-engine, native visual, and authored-content acceptance remain. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 116/116 across 21 suites plus full validator under Godot 4.7.1 | pending checkpoint commit | ENV-BM-01, UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the available engine; exact-engine and native visual acceptance remain. |
 
 ## Design blocker register
 
@@ -139,13 +138,15 @@ Append-only entries in the format:
 - 2026-09-18 — canonical authority audit — authenticated read of `12 Moons — Game Design Authority` — PASS — approved reward/carry/shop/resale rules and modifier catalogue confirmed; later execution blockers remain explicitly unresolved — 317d11b
 - 2026-09-18 — post-checkpoint full validation — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — committed checkpoint passes the project/core smoke path and retains the 110/110 suite result; validator warns that only 1/3 eligible reward definitions are authored; generated `.import` metadata was restored — 317d11b
 - 2026-09-18 — BM-14 motion convergence checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests/integration/test_card_motion.gd --ignoreHeadlessMode` — PASS — 9/9 card-motion, cancellation, reduced-motion, and NORMAL/FAST/INSTANT/REDUCED final-state convergence cases — 851ae10
-- 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 111/111 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — 851ae10
+- 2026-09-18 — approved content and transaction checkpoint — targeted `test_shop.gd`, `test_modifier_seams.gd`, `test_rewards.gd`, `test_save.gd`, and `test_between_month_ui.gd` — PASS — 35/35 targeted cases covering three production reward definitions, Salvage atomicity/attachment cleanup, Rain Check save/load/next-month persistence, and UI actions — working tree
+- 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 116/116 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — working tree
+- 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 116/116 GdUnit4 cases; authored-content warning cleared; generated `.import` metadata restored — working tree
 
 ## Known deferred work
 
 - February gameplay and later Moon rules.
 - Full modifier catalogue and unresolved modifier behavior.
-- Authored eligible reward catalogue content sufficient for the approved three-offer production pool; seam definitions remain excluded.
+- Remaining full modifier catalogue content and unresolved modifier behavior; the three approved non-seam definitions required for this milestone are now present.
 - Multiplayer, networking, cloud saves, and production telemetry.
 - Generic ability/event frameworks, ECS, database, generic inventory, or second
   rules engine.

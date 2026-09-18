@@ -8,6 +8,7 @@ var generation_id: int = 0
 var reroll_count: int = 0
 var entered: bool = false
 var offers: Array = []
+var preserved_offer: Dictionary = {}
 
 func to_dict() -> Dictionary:
 	return {
@@ -15,7 +16,8 @@ func to_dict() -> Dictionary:
 		"generation_id": generation_id,
 		"reroll_count": reroll_count,
 		"entered": entered,
-		"offers": offers.duplicate(true)
+		"offers": offers.duplicate(true),
+		"preserved_offer": preserved_offer.duplicate(true)
 	}
 
 static func from_dict(data: Dictionary) -> ShopState:
@@ -25,6 +27,9 @@ static func from_dict(data: Dictionary) -> ShopState:
 	result.reroll_count = int(data.get("reroll_count", 0))
 	result.entered = bool(data.get("entered", false))
 	result.offers = Array(data.get("offers", [])).duplicate(true)
+	var raw_preserved = data.get("preserved_offer", {})
+	if raw_preserved is Dictionary:
+		result.preserved_offer = raw_preserved.duplicate(true)
 	return result
 
 func offer(offer_id: String) -> ShopOffer:
@@ -60,4 +65,12 @@ func invariant_errors() -> Array:
 		errors.append("Shop must contain all six slot categories")
 	if reroll_count < 0:
 		errors.append("Shop reroll count cannot be negative")
+	if not preserved_offer.is_empty():
+		var preserved := ShopOffer.from_dict(preserved_offer)
+		if preserved.offer_id.is_empty() or preserved.definition_id.is_empty():
+			errors.append("Preserved shop offer must identify an offer and definition")
+		if not SLOT_IDS.has(preserved.slot_id):
+			errors.append("Preserved shop offer has an unknown slot: %s" % preserved.slot_id)
+		if preserved.consumed or preserved.available:
+			errors.append("Preserved shop offer must be unavailable and unconsumed")
 	return errors

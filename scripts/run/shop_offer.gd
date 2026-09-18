@@ -10,6 +10,7 @@ var source: String = "shop"
 var generation_id: int = 0
 var consumed: bool = false
 var available: bool = true
+var preserved: bool = false
 
 func to_dict() -> Dictionary:
 	return {
@@ -21,7 +22,8 @@ func to_dict() -> Dictionary:
 		"source": source,
 		"generation_id": generation_id,
 		"consumed": consumed,
-		"available": available
+		"available": available,
+		"preserved": preserved
 	}
 
 static func from_dict(data: Dictionary) -> ShopOffer:
@@ -35,4 +37,5 @@ static func from_dict(data: Dictionary) -> ShopOffer:
 	result.generation_id = int(data.get("generation_id", 0))
 	result.consumed = bool(data.get("consumed", false))
 	result.available = bool(data.get("available", true))
+	result.preserved = bool(data.get("preserved", false))
 	return result
