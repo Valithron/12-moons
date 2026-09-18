@@ -17,11 +17,13 @@ var _hovered: bool = false
 
 func _ready() -> void:
 	flat = true
-	focus_mode = Control.FOCUS_NONE
+	focus_mode = Control.FOCUS_ALL
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	pressed.connect(_on_pressed)
 	mouse_entered.connect(_on_mouse_entered)
 	mouse_exited.connect(_on_mouse_exited)
+	focus_entered.connect(_on_focus_entered)
+	focus_exited.connect(_on_focus_exited)
 
 func configure(card_definition: CardDefinition = null, show_face: bool = true, can_select: bool = false, show_highlight: bool = false, requested_size: Vector2 = Vector2(64, 96)) -> void:
 	definition = card_definition
@@ -85,6 +87,12 @@ func _on_mouse_exited() -> void:
 	if selectable:
 		queue_redraw()
 
+func _on_focus_entered() -> void:
+	queue_redraw()
+
+func _on_focus_exited() -> void:
+	queue_redraw()
+
 func _draw() -> void:
 	var bounds := Rect2(Vector2.ZERO, size)
 	draw_rect(bounds, Color(0.92, 0.84, 0.67), true)
@@ -98,6 +106,8 @@ func _draw() -> void:
 		draw_circle(center, min(size.x, size.y) * 0.15, Color(0.91, 0.78, 0.49))
 		draw_line(Vector2(10, 10), Vector2(size.x - 10, size.y - 10), Color(0.91, 0.78, 0.49), 1.0)
 		draw_line(Vector2(size.x - 10, 10), Vector2(10, size.y - 10), Color(0.91, 0.78, 0.49), 1.0)
+	if has_focus() and selectable:
+		draw_rect(bounds.grow(-1.0), Color(0.98, 0.87, 0.38), false, 3.0)
 	var border_color := Color(0.33, 0.20, 0.08)
 	var border_width := 2.0
 	if highlighted:

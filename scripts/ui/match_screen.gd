@@ -588,40 +588,44 @@ func _render_starter_ceremony(state: GameState) -> void:
 
 func _render_score_decision(score: Dictionary) -> void:
 	var dimmer := ColorRect.new()
-	dimmer.color = Color(0.015, 0.025, 0.04, 0.82)
+	# Keep the table readable and spatially stable. The decision is a tray over
+	# the lower edge, not a full-screen modal that hides the causal board state.
+	dimmer.color = Color(0.015, 0.025, 0.04, 0.10)
 	dimmer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	dimmer.mouse_filter = Control.MOUSE_FILTER_STOP
+	dimmer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	overlay_layer.add_child(dimmer)
 	var panel := ColorRect.new()
 	panel.color = Color(0.12, 0.20, 0.27)
-	panel.position = Vector2(320, 150)
-	panel.size = Vector2(640, 390)
+	panel.position = Vector2(280, 484)
+	panel.size = Vector2(720, 190)
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	overlay_layer.add_child(panel)
-	_add_label(panel, "YAKU IMPROVED", Vector2(0, 22), Vector2(640, 36), 28, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
-	_add_label(panel, "Choose how to close this hand", Vector2(0, 60), Vector2(640, 24), 15, MUTED, HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(panel, "YAKU IMPROVED  •  CHOOSE HOW TO CLOSE THIS HAND", Vector2(0, 14), Vector2(720, 30), 22, GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 	var current := "Current score: %d\n" % int(score.get("additive_subtotal", 0))
 	for raw_entry in Array(score.get("yaku", [])):
 		var entry: Dictionary = raw_entry
 		current += "%s  +%d\n" % [entry.get("name", ""), int(entry.get("points", 0))]
-	_add_label(panel, current, Vector2(44, 98), Vector2(552, 122), 16, TEXT, HORIZONTAL_ALIGNMENT_CENTER)
-	_add_label(panel, "STOP banks the current score. KOI-KOI keeps January alive for a higher score.", Vector2(48, 225), Vector2(544, 44), 13, MUTED, HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(panel, current, Vector2(32, 52), Vector2(300, 86), 14, TEXT, HORIZONTAL_ALIGNMENT_LEFT)
+	_add_label(panel, "STOP banks the current score. KOI-KOI keeps January alive for a higher score.", Vector2(350, 56), Vector2(334, 50), 13, MUTED, HORIZONTAL_ALIGNMENT_LEFT)
 	var stop := Button.new()
 	stop.text = "STOP"
-	stop.position = Vector2(78, 302)
-	stop.size = Vector2(210, 54)
+	stop.position = Vector2(350, 118)
+	stop.size = Vector2(148, 48)
 	stop.add_theme_font_size_override("font_size", 20)
+	stop.focus_mode = Control.FOCUS_ALL
 	stop.mouse_filter = Control.MOUSE_FILTER_STOP
 	stop.pressed.connect(_on_stop_pressed)
 	panel.add_child(stop)
 	var koi := Button.new()
 	koi.text = "KOI-KOI"
-	koi.position = Vector2(352, 302)
-	koi.size = Vector2(210, 54)
+	koi.position = Vector2(520, 118)
+	koi.size = Vector2(148, 48)
 	koi.add_theme_font_size_override("font_size", 20)
+	koi.focus_mode = Control.FOCUS_ALL
 	koi.mouse_filter = Control.MOUSE_FILTER_STOP
 	koi.pressed.connect(_on_koi_koi_pressed)
 	panel.add_child(koi)
+	stop.call_deferred("grab_focus")
 
 func _on_stop_pressed() -> void:
 	_submit_human(GameAction.new(GameAction.STOP, 0))
@@ -914,7 +918,9 @@ func _emit_month_finished() -> void:
 	if result_sent or controller == null or controller.state.phase != GameState.PHASE_MONTH_COMPLETE:
 		return
 	result_sent = true
-	month_finished.emit(controller.state.terminal_result.duplicate(true))
+	var payload := controller.state.terminal_result.duplicate(true)
+	payload["match_result"] = MatchResult.from_game_state(controller.state).to_dict()
+	month_finished.emit(payload)
 
 func _cancel_presentation() -> void:
 	_presentation_generation += 1

@@ -1,0 +1,71 @@
+{
+  "schema_version": "modifier-content-v1",
+  "modifiers": [
+    {
+      "id": "wider_choice",
+      "display_name": "Wider Choice",
+      "family": "strategic_meta",
+      "description": "Increase the January reward choice count from three offers to four.",
+      "source": "reward",
+      "tags": ["reward_generation"],
+      "effect_seams": ["reward_request_transform"],
+      "is_free_reward": true,
+      "sellable": true
+    },
+    {
+      "id": "chaff_point_upgrade_seam",
+      "display_name": "Chaff Point Upgrade (Seam)",
+      "family": "card_upgrade",
+      "description": "Reserved content seam for a future card-owned Chaff point upgrade.",
+      "source": "seam",
+      "tags": ["deferred_behavior"],
+      "effect_seams": ["score_breakdown"],
+      "is_free_reward": false,
+      "sellable": true
+    },
+    {
+      "id": "sweep_seam",
+      "display_name": "Sweep (Seam)",
+      "family": "hand_mechanic",
+      "description": "Reserved content seam for a future capture-plan augmentation.",
+      "source": "seam",
+      "tags": ["deferred_behavior"],
+      "effect_seams": ["capture_plan"],
+      "is_free_reward": false,
+      "sellable": true
+    },
+    {
+      "id": "mulligan_seam",
+      "display_name": "Mulligan (Seam)",
+      "family": "hand_mechanic",
+      "description": "Reserved content seam for a future opening decision.",
+      "source": "seam",
+      "tags": ["deferred_behavior"],
+      "effect_seams": ["opening_decision"],
+      "is_free_reward": false,
+      "sellable": true
+    },
+    {
+      "id": "second_draw_seam",
+      "display_name": "Second Draw (Seam)",
+      "family": "hand_mechanic",
+      "description": "Reserved content seam for a future draw-reveal decision.",
+      "source": "seam",
+      "tags": ["deferred_behavior"],
+      "effect_seams": ["draw_reveal_decision"],
+      "is_free_reward": false,
+      "sellable": true
+    },
+    {
+      "id": "quad_koi_seam",
+      "display_name": "Quad Koi (Seam)",
+      "family": "strategic_meta",
+      "description": "Reserved content seam for a future named multiplier replacement.",
+      "source": "seam",
+      "tags": ["deferred_behavior"],
+      "effect_seams": ["multiplier_replacement"],
+      "is_free_reward": false,
+      "sellable": true
+    }
+  ]
+}

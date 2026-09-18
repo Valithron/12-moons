@@ -16,6 +16,18 @@ function Invoke-GodotScript([string]$scriptPath) {
     return $process.ExitCode
 }
 
+# A clean checkout may not have Godot's global script-class cache yet. Warm the
+# project through the editor once so direct --script validation sees the same
+# class_name registry as an opened project, without adding another test path.
+# Godot's --quit-after value is measured in frames. Six hundred frames gives
+# the first import pass time to finish on a clean checkout.
+$import_process = Start-Process -FilePath $GodotBinary `
+    -ArgumentList @("--headless", "--editor", "--path", $projectRoot, "--quit-after", "600") `
+    -WorkingDirectory $projectRoot -Wait -NoNewWindow -PassThru
+if ($import_process.ExitCode -ne 0) {
+    exit $import_process.ExitCode
+}
+
 $manifestExit = Invoke-GodotScript "res://scripts/run/validate_project.gd"
 if ($manifestExit -ne 0) {
     exit $manifestExit

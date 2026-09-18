@@ -2,6 +2,7 @@ extends Control
 
 signal play_again_pressed
 signal return_title_pressed
+signal continue_between_month_pressed(result: Dictionary)
 
 func setup(result: Dictionary) -> void:
 	_build(result)
@@ -41,17 +42,25 @@ func _build(result: Dictionary) -> void:
 
 	var play_again := Button.new()
 	play_again.text = "PLAY AGAIN"
-	play_again.position = Vector2(470, 630)
+	play_again.position = Vector2(390, 630)
 	play_again.size = Vector2(160, 52)
 	play_again.pressed.connect(_on_play_again)
 	add_child(play_again)
 
 	var return_title := Button.new()
 	return_title.text = "RETURN TO TITLE"
-	return_title.position = Vector2(650, 630)
+	return_title.position = Vector2(760, 630)
 	return_title.size = Vector2(160, 52)
 	return_title.pressed.connect(_on_return_title)
 	add_child(return_title)
+
+	var continue_button := Button.new()
+	continue_button.text = "BETWEEN-MONTH"
+	continue_button.position = Vector2(570, 630)
+	continue_button.size = Vector2(170, 52)
+	continue_button.focus_mode = Control.FOCUS_ALL
+	continue_button.pressed.connect(func(): continue_between_month_pressed.emit(result))
+	add_child(continue_button)
 
 func _add_score_panel(title: String, score: Dictionary, position_value: Vector2) -> void:
 	var panel := ColorRect.new()

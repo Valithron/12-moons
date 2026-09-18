@@ -42,6 +42,21 @@ func test_presentation_queue_cancel_clears_pending_jobs() -> void:
 	assert_str(events[0]).is_equal("started-long")
 	queue.free()
 
+func test_presentation_queue_cancel_and_restore_runs_finalizer_once() -> void:
+	var queue := MoonPresentationQueue.new()
+	add_child(queue)
+	var events: Array = []
+	queue.enqueue("long", Callable(self, "_record_long_queue_job").bind(events))
+	await get_tree().process_frame
+	queue.cancel_and_restore(func() -> void: events.append("restored"))
+	for _frame in range(4):
+		await get_tree().process_frame
+	assert_bool(queue.is_busy()).is_false()
+	assert_int(queue.pending_count()).is_equal(0)
+	assert_int(events.count("restored")).is_equal(1)
+	assert_bool(events.has("ended-long")).is_false()
+	queue.free()
+
 func test_card_registry_reuses_one_visual_node_per_stable_id() -> void:
 	var catalog := CardCatalog.new()
 	var state := GameState.fresh(17, catalog)

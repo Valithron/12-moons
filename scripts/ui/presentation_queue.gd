@@ -7,6 +7,7 @@ extends Node
 
 signal busy_changed(is_busy: bool)
 signal sequence_finished(label: String)
+signal cancelled(epoch: int)
 
 var _jobs: Array = []
 var _running: bool = false
@@ -25,9 +26,15 @@ func enqueue(label: String, worker: Callable) -> void:
 func cancel() -> void:
 	_generation += 1
 	_jobs.clear()
+	cancelled.emit(_generation)
 	if _running:
 		_running = false
 		busy_changed.emit(false)
+
+func cancel_and_restore(finalizer: Callable = Callable()) -> void:
+	cancel()
+	if finalizer.is_valid():
+		finalizer.call()
 
 func is_busy() -> bool:
 	return _running

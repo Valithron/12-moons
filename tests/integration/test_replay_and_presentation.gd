@@ -83,7 +83,7 @@ func test_table_layout_regions_fit_without_baseline_overlap() -> void:
 			assert_bool(not (rects[first_name] as Rect2).intersects(rects[second_name] as Rect2)).is_true()
 	root.free()
 
-func test_score_decision_overlay_is_modal() -> void:
+func test_score_decision_overlay_preserves_context() -> void:
 	var match_scene := load("res://scenes/match/match.tscn")
 	var match_screen: Control = match_scene.instantiate()
 	var controller := MatchController.new(77, CardCatalog.new())
@@ -94,7 +94,7 @@ func test_score_decision_overlay_is_modal() -> void:
 	await get_tree().process_frame
 	var overlay: Control = match_screen.get("overlay_layer")
 	assert_int(overlay.get_child_count()).is_equal(2)
-	assert_int(overlay.get_child(0).mouse_filter).is_equal(Control.MOUSE_FILTER_STOP)
+	assert_int(overlay.get_child(0).mouse_filter).is_equal(Control.MOUSE_FILTER_IGNORE)
 	assert_int(overlay.get_child(1).mouse_filter).is_equal(Control.MOUSE_FILTER_STOP)
 	var panel: Control = overlay.get_child(1)
 	var stop_button := _find_button(panel, "STOP")

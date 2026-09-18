@@ -64,6 +64,6 @@ func test_november_has_a_red_ribbon_and_distinct_face_art() -> void:
 	var ribbon := catalog.get_card("m11_willow_november_chaff")
 	assert_str(ribbon.base_class).is_equal("ribbon")
 	assert_bool(ribbon.has_tag("red_ribbon")).is_true()
-	assert_str(ribbon.art_path).is_equal("res://assets/cards/Hanafuda_November_Tanzaku.png")
+	assert_str(ribbon.art_path).is_equal("res://assets/cards/prototype/thaw/hanafuda/november/willow-red-ribbon.webp")
 	assert_bool(FileAccess.file_exists(ribbon.art_path)).is_true()
 	assert_str(catalog.get_card("m11_willow_november_lightning_chaff").art_path).is_not_equal(ribbon.art_path)

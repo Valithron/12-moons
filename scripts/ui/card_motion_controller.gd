@@ -14,7 +14,7 @@ func _init(host_node: Node, motion_timings: MoonMotionTimings = null) -> void:
 	host = host_node
 	timings = motion_timings if motion_timings != null else MoonMotionTimings.new()
 
-func cancel_all() -> void:
+func cancel_all(finalizer: Callable = Callable()) -> void:
 	_generation += 1
 	for tween_variant in _active_tweens.duplicate():
 		var tween: Tween = tween_variant
@@ -22,6 +22,8 @@ func cancel_all() -> void:
 			tween.kill()
 	_active_tweens.clear()
 	_card_tweens.clear()
+	if finalizer.is_valid():
+		finalizer.call()
 
 func hold(seconds: float) -> void:
 	var wait_seconds := timings.duration(seconds)

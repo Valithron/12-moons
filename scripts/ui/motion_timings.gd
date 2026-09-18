@@ -9,7 +9,8 @@ extends RefCounted
 enum Mode {
 	NORMAL,
 	FAST,
-	REDUCED
+	INSTANT,
+	REDUCED # Kept as a compatibility alias for older UI settings.
 }
 
 const DEAL_TRAVEL := 0.18
@@ -33,14 +34,31 @@ const MODAL_DISMISS := 0.13
 const RESULT_HOLD := 0.24
 
 var mode: Mode = Mode.NORMAL
+var reduced_motion: bool = false
+var profile: MotionProfile = MotionProfile.new()
 
 func duration(seconds: float) -> float:
+	profile.reduced_motion = reduced_motion or mode == Mode.REDUCED
 	match mode:
 		Mode.FAST:
-			return seconds * 0.58
-		Mode.REDUCED:
-			return 0.0
-	return seconds
+			profile.speed = MotionProfile.Speed.FAST
+		Mode.INSTANT:
+			profile.speed = MotionProfile.Speed.INSTANT
+		_:
+			profile.speed = MotionProfile.Speed.NORMAL
+	return profile.duration(seconds)
 
 func is_reduced() -> bool:
-	return mode == Mode.REDUCED
+	return reduced_motion or mode == Mode.REDUCED or mode == Mode.INSTANT
+
+func set_reduced_motion(enabled: bool) -> void:
+	reduced_motion = enabled
+
+func set_speed(speed: MotionProfile.Speed) -> void:
+	match speed:
+		MotionProfile.Speed.FAST:
+			mode = Mode.FAST
+		MotionProfile.Speed.INSTANT:
+			mode = Mode.INSTANT
+		_:
+			mode = Mode.NORMAL

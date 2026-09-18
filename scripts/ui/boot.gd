@@ -35,7 +35,7 @@ func _show_title() -> void:
 	start.add_theme_font_size_override("font_size", 22)
 	start.pressed.connect(_show_january_intro)
 	root.add_child(start)
-	_add_label(root, "Prototype 0.2.0-prototype.6", Vector2(0, 646), Vector2(1280, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(root, "Prototype 0.2.0-prototype.9", Vector2(0, 646), Vector2(1280, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
 
 func _show_january_intro() -> void:
 	_clear_screen()
@@ -63,6 +63,24 @@ func _show_result(result: Dictionary) -> void:
 	result_screen.setup(result)
 	result_screen.play_again_pressed.connect(_begin_january)
 	result_screen.return_title_pressed.connect(_show_title)
+	result_screen.continue_between_month_pressed.connect(_show_between_month)
+
+func _show_between_month(result: Dictionary) -> void:
+	_clear_screen()
+	var raw_match_result = result.get("match_result", {})
+	if not raw_match_result is Dictionary:
+		_show_title()
+		return
+	var match_result := MatchResult.from_dict(raw_match_result)
+	var run_controller := RunController.new(12012000 + run_number)
+	var ingestion := run_controller.ingest_match_result(match_result)
+	if not ingestion.accepted:
+		_show_title()
+		return
+	var between_screen = load("res://scenes/between_month/between_month.tscn").instantiate()
+	add_child(between_screen)
+	screen = between_screen
+	between_screen.configure(run_controller, match_result)
 
 func _add_label(parent: Node, value: String, position_value: Vector2, size_value: Vector2, font_size: int, color: Color, alignment: int) -> void:
 	var label := Label.new()
