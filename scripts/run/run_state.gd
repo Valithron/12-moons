@@ -231,6 +231,9 @@ func invariant_errors(catalog: CardCatalog = null, registry: ModifierRegistry = 
 		errors.append("Duplicate settled match ID")
 	for rule_error in rules().invariant_errors():
 		errors.append(String(rule_error))
+	if not reward_state.is_empty():
+		for reward_error in RewardState.from_dict(reward_state).invariant_errors():
+			errors.append(String(reward_error))
 	if not shop_state.is_empty():
 		for shop_error in ShopState.from_dict(shop_state).invariant_errors():
 			errors.append(String(shop_error))

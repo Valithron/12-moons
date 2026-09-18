@@ -62,7 +62,7 @@ func test_configured_win_path_reaches_february_placeholder() -> void:
 	assert_int(controller.state.month).is_equal(2)
 	assert_str(controller.replay_final_hash()).is_equal(controller.state.state_hash())
 
-func test_injected_liquidation_path_reaches_february_placeholder() -> void:
+func test_authoritative_liquidation_path_reaches_february_placeholder() -> void:
 	var controller := _controller(1602, 0)
 	controller.state.unlocked_active_capacity = 1
 	controller.state.modifier_instances["liquidation_target"] = {
@@ -74,7 +74,8 @@ func test_injected_liquidation_path_reaches_february_placeholder() -> void:
 		"attached_card_ids": []
 	}
 	controller.state.active_modifier_ids = ["liquidation_target"]
-	controller.liquidation_quote_provider = func(_instance_id: String, _state: RunState) -> int: return 3
+	controller.state.modifier_instances["liquidation_target"]["source"] = "shop"
+	controller.state.modifier_instances["liquidation_target"]["purchase_price"] = 6
 	controller.journal = RunJournal.new(controller.state.root_seed, controller.state.to_dict())
 	assert_bool(controller.ingest_match_result(_result("loss_loop", 3, 8)).accepted).is_true()
 	_submit(controller, RunAction.SETTLE)

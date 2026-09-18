@@ -7,6 +7,8 @@ func test_fresh_run_uses_prototype_defaults() -> void:
 	assert_int(state.bankroll).is_equal(20)
 	assert_int(state.unlocked_active_capacity).is_equal(0)
 	assert_int(state.reserve_capacity).is_equal(4)
+	assert_str(state.rules().reward_policy).is_equal(RunRules.REWARD_POLICY_WHOLE_POOL)
+	assert_str(state.rules().duplicate_modifier_policy).is_equal("unique_definition")
 	assert_bool(state.invariants_ok()).is_true()
 
 func test_run_state_round_trip_and_hash_are_stable() -> void:

@@ -27,7 +27,6 @@ static func create_controller(scenario: String, seed_value: int = 1201) -> RunCo
 			controller.state.modifier_instances["scenario_modifier"] = _modifier("scenario_modifier", "wider_choice", "active")
 			controller.state.active_modifier_ids = ["scenario_modifier"]
 			controller.state.unlocked_active_capacity = 1
-			controller.liquidation_quote_provider = func(_instance_id: String, _state: RunState) -> int: return 30
 			_reset_journal(controller)
 			controller.submit_action(RunAction.new(RunAction.SETTLE))
 		"bankruptcy":
@@ -35,7 +34,6 @@ static func create_controller(scenario: String, seed_value: int = 1201) -> RunCo
 			controller.state.modifier_instances["scenario_modifier"] = _modifier("scenario_modifier", "wider_choice", "active")
 			controller.state.active_modifier_ids = ["scenario_modifier"]
 			controller.state.unlocked_active_capacity = 1
-			controller.liquidation_quote_provider = func(_instance_id: String, _state: RunState) -> int: return 0
 			_reset_journal(controller)
 			controller.submit_action(RunAction.new(RunAction.SETTLE))
 			controller.submit_action(RunAction.new(RunAction.LIQUIDATE, 0, {"instance_id": "scenario_modifier"}))
@@ -47,16 +45,16 @@ static func create_controller(scenario: String, seed_value: int = 1201) -> RunCo
 			_prepare_carry(controller)
 		"initial_shop":
 			_prepare_carry(controller)
-			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP, 0, {"duplicate_policy": "unique_definition"}))
+			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP))
 		"shop_after_reroll_1":
 			_prepare_carry(controller)
-			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP, 0, {"duplicate_policy": "unique_definition"}))
-			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": "unique_definition"}))
+			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP))
+			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP))
 		"shop_after_reroll_2":
 			_prepare_carry(controller)
-			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP, 0, {"duplicate_policy": "unique_definition"}))
-			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": "unique_definition"}))
-			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": "unique_definition"}))
+			controller.submit_action(RunAction.new(RunAction.ENTER_SHOP))
+			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP))
+			controller.submit_action(RunAction.new(RunAction.REROLL_SHOP))
 		"full_capacity":
 			_prepare_full_capacity(controller)
 		"february_placeholder":
@@ -143,7 +141,9 @@ static func _modifier(instance_id: String, definition_id: String, location: Stri
 		"location": location,
 		"source": "scenario",
 		"acquired_month": 1,
-		"attached_card_ids": []
+		"attached_card_ids": [],
+		"purchase_price": 0,
+		"base_shop_price": 4
 	}
 
 static func _offer_ids(container: Dictionary, key: String) -> Array:

@@ -41,27 +41,26 @@ func test_settlement_screen_observes_run_state_and_exposes_one_commit_action() -
 	assert_int(controller.state.bankroll).is_equal(20)
 	screen.queue_free()
 
-func test_liquidation_screen_explains_unresolved_amount_and_policy_boundary() -> void:
+func test_liquidation_screen_exposes_authoritative_sale_actions() -> void:
 	var controller := DebugScenarioFactory.create_controller("liquidation_required", 1222)
 	var screen: Node = load("res://scenes/between_month/between_month.tscn").instantiate()
 	add_child(screen)
 	screen.configure(controller)
 	await get_tree().process_frame
 	assert_str(controller.state.phase).is_equal(RunState.PHASE_LIQUIDATION)
-	assert_str(screen.get("status_label").text).contains("more to settle")
-	assert_str(screen.get("status_label").text).contains("BM-B05")
+	assert_str(screen.get("status_label").text).contains("requires $30 more")
+	assert_str(screen.get("status_label").text).contains("authoritative resale")
+	assert_bool(_find_button(screen, "LIQUIDATE wider_choice — Increase the January reward choice count from three offers to four.  (+$2)") != null).is_true()
 	screen.queue_free()
 
-func test_reward_screen_surfaces_policy_blocker_without_mutating_run() -> void:
+func test_reward_screen_uses_approved_default_policy_without_mutating_run() -> void:
 	var controller := RunController.new(1313)
 	controller.state.phase = RunState.PHASE_REWARD
 	var screen: Node = load("res://scenes/between_month/between_month.tscn").instantiate()
 	add_child(screen)
 	screen.configure(controller)
 	await get_tree().process_frame
-	var before := controller.state.state_hash()
-	assert_str(screen.get("status_label").text).contains("BM-B01")
-	assert_str(controller.state.state_hash()).is_equal(before)
+	assert_str(screen.get("status_label").text).contains("three persisted offers")
 	screen.queue_free()
 
 func test_configured_reward_screen_submits_empty_payload_and_renders_persisted_offers() -> void:

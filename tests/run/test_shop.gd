@@ -75,7 +75,7 @@ func test_full_storage_rejects_purchase_without_currency_or_inventory_mutation()
 	var result := controller.submit_action(RunAction.new(RunAction.BUY_OFFER, 0, {"offer_id": target.offer_id}))
 	assert_bool(result.accepted).is_false()
 	assert_str(controller.state.state_hash()).is_equal(before)
-	assert_str(result.reason).contains("BM-B04")
+	assert_str(result.reason).contains("carry locations are full")
 
 func test_rerolls_are_deterministic_costed_and_limited_to_two() -> void:
 	var first := _controller()
@@ -94,15 +94,14 @@ func test_rerolls_are_deterministic_costed_and_limited_to_two() -> void:
 	assert_bool(first.submit_action(RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": "unique_definition"})).accepted).is_false()
 	assert_str(first.state.state_hash()).is_equal(before)
 
-func test_sale_uses_injected_quote_and_month_boundary_actions() -> void:
+func test_sale_uses_authoritative_resale_and_month_boundary_actions() -> void:
 	var controller := _controller()
 	var shop := _enter(controller)
 	var target := ShopOffer.from_dict(shop.offers[2])
 	assert_bool(controller.submit_action(RunAction.new(RunAction.BUY_OFFER, 0, {"offer_id": target.offer_id, "destination": "active"})).accepted).is_true()
-	controller.liquidation_quote_provider = func(_instance_id: String, _state: RunState) -> int: return 4
 	var instance_id := String(controller.state.active_modifier_ids[0])
 	assert_bool(controller.submit_action(RunAction.new(RunAction.SELL_MODIFIER, 0, {"instance_id": instance_id})).accepted).is_true()
-	assert_int(controller.state.bankroll).is_equal(20 - target.price + 4)
+	assert_int(controller.state.bankroll).is_equal(20 - target.price + floori(target.price / 2.0))
 	assert_bool(controller.submit_action(RunAction.new(RunAction.EXIT_SHOP)).accepted).is_true()
 	assert_str(controller.state.phase).is_equal(RunState.PHASE_FINALIZE)
 	assert_bool(controller.submit_action(RunAction.new(RunAction.FINALIZE_BUILD)).accepted).is_true()

@@ -38,19 +38,18 @@ func test_exact_zero_settlement_is_legal() -> void:
 	assert_int(controller.state.bankroll).is_equal(20)
 	assert_str(controller.state.phase).is_equal(RunState.PHASE_REWARD)
 
-func test_unpayable_loss_enters_liquidation_without_negative_bankroll() -> void:
+func test_unpayable_loss_without_saleable_assets_enters_bankruptcy_without_negative_bankroll() -> void:
 	var controller := _controller_with_result(30, 31)
 	assert_bool(controller.submit_action(RunAction.new(RunAction.SETTLE)).accepted).is_true()
-	assert_str(controller.state.phase).is_equal(RunState.PHASE_LIQUIDATION)
+	assert_str(controller.state.phase).is_equal(RunState.PHASE_BANKRUPT)
 	assert_int(controller.state.bankroll).is_equal(20)
 	assert_int(PendingSettlement.from_dict(controller.state.pending_settlement).amount_due).is_equal(30)
 
-func test_liquidation_uses_injected_quote_policy_and_reaches_reward() -> void:
+func test_liquidation_uses_authoritative_resale_and_reaches_reward() -> void:
 	var controller := _controller_with_result(25, 26)
-	controller.state.modifier_instances["mod_1"] = {"instance_id": "mod_1", "definition_id": "wider_choice", "location": "active", "attached_card_ids": []}
+	controller.state.modifier_instances["mod_1"] = {"instance_id": "mod_1", "definition_id": "wider_choice", "location": "active", "source": "shop", "purchase_price": 50, "base_shop_price": 4, "attached_card_ids": []}
 	controller.state.active_modifier_ids = ["mod_1"]
 	controller.state.unlocked_active_capacity = 1
-	controller.liquidation_quote_provider = func(_instance_id: String, _state: RunState) -> int: return 25
 	assert_bool(controller.submit_action(RunAction.new(RunAction.SETTLE)).accepted).is_true()
 	var before := controller.state.state_hash()
 	var sale := controller.submit_action(RunAction.new(RunAction.LIQUIDATE, 0, {"instance_id": "mod_1"}))
@@ -60,10 +59,9 @@ func test_liquidation_uses_injected_quote_policy_and_reaches_reward() -> void:
 	assert_bool(controller.state.modifier_instances.has("mod_1")).is_false()
 	assert_bool(before != controller.state.state_hash()).is_true()
 
-func test_unconfigured_liquidation_policy_is_a_precise_blocker() -> void:
-	var controller := _controller_with_result(25, 26)
-	assert_bool(controller.submit_action(RunAction.new(RunAction.SETTLE)).accepted).is_true()
-	var before := controller.state.state_hash()
-	var sale := controller.submit_action(RunAction.new(RunAction.LIQUIDATE, 0, {"instance_id": "missing"}))
-	assert_bool(sale.accepted).is_false()
-	assert_str(controller.state.state_hash()).is_equal(before)
+func test_free_reward_resale_uses_half_of_normal_base_price() -> void:
+	var registry := ModifierRegistry.new()
+	var definition := registry.get_definition("wider_choice")
+	assert_object(definition).is_not_null()
+	var instance := {"definition_id": "wider_choice", "source": "january_reward", "base_shop_price": definition.base_shop_price}
+	assert_int(ModifierResalePolicy.quote(instance, registry)).is_equal(2)

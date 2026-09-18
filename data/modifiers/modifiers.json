@@ -10,7 +10,10 @@
       "tags": ["reward_generation"],
       "effect_seams": ["reward_request_transform"],
       "is_free_reward": true,
-      "sellable": true
+      "sellable": true,
+      "stackable": false,
+      "allow_same_card_stack": false,
+      "base_shop_price": 4
     },
     {
       "id": "chaff_point_upgrade_seam",

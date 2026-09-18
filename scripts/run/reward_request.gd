@@ -44,11 +44,13 @@ func with_wider_choice() -> RewardRequest:
 	if result.choice_count != 3:
 		return result
 	result.choice_count = 4
-	if result.reward_policy == POLICY_WHOLE_POOL:
-		result.slot_specs.append(SLOT_ANY)
-	else:
-		result.requires_policy_decision = true
-		result.unresolved_reason = "Fourth Wider Choice slot under family quotas requires BM-B06 approval"
+	# Wider Choice is a whole-pool transformation. Family-quota requests remain
+	# accepted as a legacy/test request shape, but do not create a second policy
+	# branch for the fourth slot.
+	result.reward_policy = POLICY_WHOLE_POOL
+	result.slot_specs = [SLOT_ANY, SLOT_ANY, SLOT_ANY, SLOT_ANY]
+	result.requires_policy_decision = false
+	result.unresolved_reason = ""
 	return result
 
 func is_resolvable() -> bool:

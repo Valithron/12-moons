@@ -41,6 +41,14 @@ func get_definition(definition_id: String) -> ModifierDefinition:
 func has_definition(definition_id: String) -> bool:
 	return _definitions.has(definition_id)
 
+func eligible_reward_definition_ids() -> Array:
+	var result: Array = []
+	for definition_id in ids():
+		var definition: ModifierDefinition = get_definition(String(definition_id))
+		if definition != null and definition.source != "seam":
+			result.append(definition.definition_id)
+	return result
+
 func validate() -> Array:
 	var errors := _load_errors.duplicate()
 	var valid_families := ["card_upgrade", "hand_mechanic", "strategic_meta", "wildcard", "service"]

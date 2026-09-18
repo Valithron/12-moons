@@ -49,3 +49,26 @@ func test_attachment_index_requires_a_card_upgrade_and_preserves_one_physical_ta
 	assert_bool(state.invariants_ok(null, registry)).is_true()
 	state.card_upgrade_attachments["card_a"] = ["upgrade", "upgrade"]
 	assert_bool(state.invariants_ok(null, registry)).is_false()
+
+func test_card_upgrade_type_can_target_two_physical_cards_but_not_the_same_card_twice() -> void:
+	var controller := RunController.new(20)
+	controller.modifier_registry = ModifierRegistry.new()
+	var definition := ModifierDefinition.new()
+	definition.definition_id = "synthetic_upgrade"
+	definition.display_name = "Synthetic Upgrade"
+	definition.family = "card_upgrade"
+	definition.description = "A deterministic card upgrade fixture"
+	definition.source = "test"
+	controller.modifier_registry._definitions[definition.definition_id] = definition
+	controller.state.phase = RunState.PHASE_CARRY
+	controller.state.unlocked_active_capacity = 3
+	for instance_id in ["upgrade_a", "upgrade_b", "upgrade_c"]:
+		controller.state.modifier_instances[instance_id] = {"instance_id": instance_id, "definition_id": "synthetic_upgrade", "location": "active", "source": "reward", "attached_card_ids": []}
+		controller.state.active_modifier_ids.append(instance_id)
+	assert_bool(controller.submit_action(RunAction.new(RunAction.ATTACH_CARD_UPGRADE, 0, {"instance_id": "upgrade_a", "card_id": "physical_a"})).accepted).is_true()
+	assert_bool(controller.submit_action(RunAction.new(RunAction.ATTACH_CARD_UPGRADE, 0, {"instance_id": "upgrade_b", "card_id": "physical_b"})).accepted).is_true()
+	var before := controller.state.state_hash()
+	var rejected := controller.submit_action(RunAction.new(RunAction.ATTACH_CARD_UPGRADE, 0, {"instance_id": "upgrade_c", "card_id": "physical_a"}))
+	assert_bool(rejected.accepted).is_false()
+	assert_str(controller.state.state_hash()).is_equal(before)
+	assert_bool(controller.submit_action(RunAction.new(RunAction.DETACH_CARD_UPGRADE, 0, {"instance_id": "upgrade_a", "card_id": "physical_a"})).accepted).is_true()

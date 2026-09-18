@@ -16,7 +16,8 @@ static func generate(request: RewardRequest, root_seed: int, registry: ModifierR
 			return {"ok": false, "reason": "No eligible modifier for reward slot %d (%s)" % [slot_index + 1, slot_spec]}
 		var rng := DeterministicRng.for_scope(root_seed, "reward", request.month, "%s/%d" % [request.generation_id, slot_index])
 		var selected_id := String(candidates[rng.randi_range(0, candidates.size() - 1)])
-		if request.duplicate_policy == "unique_definition":
+		var selected_definition := registry.get_definition(selected_id)
+		if request.duplicate_policy == "unique_definition" and selected_definition != null and not selected_definition.stackable:
 			used_definitions[selected_id] = true
 		var offer := RewardOffer.new()
 		offer.offer_id = "reward_%d_%d_%d_%s" % [request.month, request.generation_id, slot_index, selected_id]
@@ -35,9 +36,11 @@ static func _eligible_ids(slot_spec: String, request: RewardRequest, registry: M
 		var definition_id := String(raw_id)
 		if request.excluded_definition_ids.has(definition_id):
 			continue
-		if request.duplicate_policy == "unique_definition" and used_definitions.has(definition_id):
-			continue
 		var definition := registry.get_definition(definition_id)
+		if definition == null:
+			continue
+		if request.duplicate_policy == "unique_definition" and used_definitions.has(definition_id) and not definition.stackable:
+			continue
 		if _slot_accepts(slot_spec, definition):
 			result.append(definition_id)
 	return result

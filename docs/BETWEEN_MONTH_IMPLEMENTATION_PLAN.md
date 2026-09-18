@@ -64,7 +64,7 @@ Original planning baseline: branch `main`, commit `e26a5da112aef4afd5e54e25e741b
 
 ### APPROVED BETWEEN-MONTH POLICY DECISIONS
 
-Sterling approved the following prototype rules on 2026-09-18. They supersede the prior BM-B01 through BM-B06 blockers and the earlier contradictory one-per-family reward baseline.
+The continuation objective and merged repository authority notes record the following prototype rules as approved on 2026-09-18. They supersede the prior BM-B01 through BM-B06 blockers and the earlier contradictory one-per-family reward baseline. The authenticated canonical **12 Moons — Game Design Authority** was also read during the continuation audit on 2026-09-18. Its locked/approved sections confirm the full-pool reward, eight-slot carry, full-capacity replacement/refusal, six-slot shop, resale formulas, and the approved modifier catalogue; no rule beyond those sources is inferred here.
 
 | ID | Approved rule | Status |
 |---|---|---|
@@ -77,7 +77,7 @@ Sterling approved the following prototype rules on 2026-09-18. They supersede th
 
 ### Remaining design decisions
 
-These remain unresolved but do not block the current between-month milestone unless later authored content specifically requires them.
+These remain unresolved in the canonical authority and do not block the current between-month milestone unless later authored content specifically requires them.
 
 | ID | Decision | Classification |
 |---|---|---|
@@ -90,6 +90,50 @@ These remain unresolved but do not block the current between-month milestone unl
 
 Mulligan, Second Draw, unresolved Card Upgrade targeting/stacking, and replacement conflicts receive seams only during this milestone. Do not invent those later rules merely to demonstrate the seams.
 
+## Design Decisions Requiring Sterling Approval Before or During Implementation
+
+### BLOCKING NOW
+
+None for the current continuation. BM-B01 through BM-B05 were approved in the
+continuation objective and are implemented as production policy. BM-B06 is not
+applicable under the full-pool reward policy. No later goal may reopen those
+decisions merely because authored content or exact-engine validation is absent.
+
+### BLOCKING LATER
+
+These decisions are intentionally not guessed during the January-to-February
+milestone. Each blocks only the milestone that first makes the corresponding
+rule playable:
+
+- `BM-B07` blocks authored Card Upgrade acquisition until Sterling chooses a
+  fixed target encoded in the offer or a player-selected target after purchase.
+  The authority locks the effects of several Card Upgrades but does not lock
+  how an offer acquires its physical target.
+- `BM-B08` blocks multi-type Card Upgrade behavior on one physical card until
+  Sterling chooses whether different upgrade definitions may coexist and how
+  conflicts resolve.
+- `BM-B09` blocks Mulligan implementation until Sterling specifies the returned
+  card and shuffle procedure. The authority approves returning up to two
+  opening-hand cards and drawing replacements, but does not define the exact
+  deterministic return/shuffle order.
+- `BM-B10` blocks Second Draw implementation until Sterling specifies the one-
+  card and zero-card outcomes.
+- `BM-B11` blocks conflicting replacement effects until Sterling specifies the
+  precedence or composition rule. The authority does say that a named effect
+  such as Quad Koi replaces the normal Koi-Koi multiplier rather than adding a
+  second copy, but it does not define conflicts between multiple replacements.
+
+The neutral architecture may persist these decisions as legal-action seams,
+but it cannot safely choose their gameplay semantics. The later goal must stop
+at the named milestone if authored content requires one of these rules.
+
+### NON-BLOCKING
+
+`BM-B12` voluntary bankruptcy may remain absent from this milestone because
+unpayable settlement debt with no legal sale is already represented by the
+authoritative `BANKRUPT` phase. A later rules pass may add an explicit voluntary
+action without changing the current settlement contract.
+
 ### DEFERRED BY ROADMAP
 
 February gameplay; all twelve Moon rules; the full approved modifier catalogue;
@@ -98,6 +142,42 @@ event bus, ECS, database, generic inventory framework, cloud saves/telemetry,
 advanced AI search; touch-specific layout; 3D/rigid-body cards; full-screen
 post-processing; large shader/VFX libraries; adaptive music; complex haptics;
 and bespoke boards or seasonal content beyond the February placeholder.
+
+## Asset dependency handling
+
+The later goal must keep behavior and authored presentation dependencies
+separate:
+
+### CODE-COMPLETE WITHOUT FINAL ASSETS
+
+- RunState, RunController, settlement, liquidation, bankruptcy, carry,
+  replacement/refusal, reward/shop transactions, save/load, replay/hash checks,
+  debug scenarios, and all deterministic tests.
+- Reward and shop presentation using neutral labels, existing card faces, and
+  Compatibility-safe controls.
+- MotionProfile, cancellation, Normal/Fast/Instant, Reduced Motion, focus
+  behavior, semantic audio hooks, and MonthPresentationProfile seams.
+
+### REQUIRES AUTHORED ASSET BEFORE ACCEPTANCE
+
+- The production modifier manifest must contain enough authored non-seam
+  definitions for the approved three-offer reward pool. A seam entry is not
+  content and must not be activated as filler.
+- Any final authored modifier descriptions, icons, or audio explicitly required
+  by the Game Design Authority for a modifier that is made playable.
+- Exact Godot 4.7.2/native visual acceptance and human inspection at 1280×720
+  plus a higher resolution, when the required engine/native environment is
+  available.
+
+### FINAL-ASSET POLISH DEFERRED
+
+- Twelve bespoke seasonal boards, rigid-body card physics, full-screen
+  post-processing, a large shader/VFX library, unique VFX per modifier,
+  adaptive soundtrack layers, complex haptics, December hero treatment,
+  elaborate weather, and other later-Moon ambience.
+- Placeholder/neutral treatment is acceptable for this milestone wherever the
+  behavior can be verified without the final asset. Missing final art or audio
+  must not block domain, save, replay, or interaction implementation.
 
 ## Architecture review gates
 
@@ -742,7 +822,9 @@ February rules are implied or implemented.
 
 **Architecture gates:** G3, G4, G6, G8.
 
-**Blockers:** none beyond unresolved asset approval.
+**Blockers:** final art is not a code prerequisite; authored minimum reward
+content and exact-engine/native acceptance are tracked as `CONTENT-BM-01`,
+`ENV-BM-01`, and `UX-BM-01` in the progress ledger.
 
 **Checkpoint:** boundary hash and placeholder flow recorded.
 
@@ -781,7 +863,9 @@ placeholder succeeds and is fully evidenced.
 
 **Architecture gates:** G1–G8.
 
-**Blockers:** all BLOCKING NOW decisions resolved; later blockers remain only as
+**Blockers:** all BLOCKING NOW decisions are resolved. `CONTENT-BM-01` must be
+cleared for a fresh production reward run, and `ENV-BM-01`/`UX-BM-01` must be
+cleared for final release acceptance; later design blockers remain only as
 documented seams.
 
 **Checkpoint:** final Definition of Done signed in the progress ledger.
@@ -795,6 +879,8 @@ documented seams.
   finalization are authoritative actions with hash-preserving rejection.
 - Generated reward/shop offers persist and use isolated deterministic RNG scopes.
 - Wider Choice is implemented through `RewardRequest` transformation only.
+- The production modifier manifest contains enough authored non-seam content to
+  generate the approved three-offer pool; seam entries never count as filler.
 - All modifier instances have one legal location; reserve effects are inactive;
   card upgrades preserve physical 48-card conservation.
 - Every between-month phase saves, loads, and continues identically.

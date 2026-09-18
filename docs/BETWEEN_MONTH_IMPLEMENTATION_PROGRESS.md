@@ -17,19 +17,34 @@ production infrastructure required by the implementation plan.
 ## Current repository baseline
 
 - Branch: `main`
-- Current synchronized policy baseline commit: `7083487fb7d72a7ff39fd5d3fb2a83a9f4fe724b`
+- Current synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
 - `VERSION`: `0.2.0-prototype.11`
 - `project.godot` version: `0.2.0-prototype.11`
 - Current implementation: deterministic January month, legal public-information
   AI, yaku/scoring, Stop/Koi-Koi, stable card presentation, motion queue, run
   authority, settlement/liquidation hooks, modifier/carry ownership, reward
   generation, six-slot shop transactions, save/migration, debug scenarios, and
-  the initial between-month presentation shell. The former BM-B01 through BM-B05 policy blockers are now approved and BM-B06 is not applicable; the remaining work is to wire those approved defaults into production paths, revalidate, and finish exact-engine/native visual acceptance.
+  the initial between-month presentation shell. BM-B01 through BM-B05 are now
+  wired as production defaults and BM-B06 is not applicable. Remaining
+  acceptance work is exact-engine/native visual validation plus authored
+  eligible reward content; no unresolved modifier seam is being activated.
 - Required validation:
   `scripts/run/validate_project.ps1 -GodotBinary <discovered Godot 4.7.2 binary>`
 - Baseline validation status: PASS under available Godot 4.7.1; exact Godot
   4.7.2 remains an environment preflight requirement.
-- Authority status: root `AGENTS.md` is present on merged `main`. The canonical Game Design Authority was consulted externally on 2026-09-18 and BM-B01 through BM-B05 were explicitly approved; BM-B06 is no longer applicable because full-pool rewards were chosen. A Codex runtime that cannot access the external authority must treat these recorded approved rules as authoritative for this milestone.
+- Authority status: root `AGENTS.md` is present on merged `main`. The continuation objective and merged repository authority notes record BM-B01 through BM-B05 as approved; BM-B06 is no longer applicable because full-pool rewards were chosen. The authenticated canonical **12 Moons — Game Design Authority** was read during the 2026-09-18 continuation audit. It confirms the approved full-pool reward/carry/shop/resale rules and the approved modifier catalogue; unresolved execution details remain recorded in the blocker register and no additional rule is inferred.
+
+## Current acceptance blockers
+
+- `ENV-BM-01` — no Godot 4.7.2 executable is available in the discovered
+  environment; the full suite is currently provisional under Godot 4.7.1.
+- `UX-BM-01` — native CUA inspection did not expose an interactive Godot/native
+  surface, so visual acceptance remains a human/environment check.
+- `CONTENT-BM-01` — the production manifest currently contains one eligible
+  non-seam reward definition (`wider_choice`). The approved default needs three
+  persisted offers; synthetic registries prove the domain path, while authored
+  content is required before fresh production reward generation can be accepted.
+  Seam entries remain excluded and must not be promoted merely to fill offers.
 
 ## Milestone table
 
@@ -39,21 +54,21 @@ production infrastructure required by the implementation plan.
 | BM-01 | RunState and prototype configuration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Serializable phase/bankroll/capacity/ownership state and invariant checks are present. |
 | BM-02 | Run actions, controller, journal, RNG scopes | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Copy-validate-commit, journal hashes, rejected-action hash invariance, and scoped RNG pass. |
 | BM-03 | MatchResult bridge and January ingestion | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Terminal-only result extraction and duplicate protection pass; boot now carries the typed result. |
-| BM-04 | Settlement, liquidation, bankruptcy | IN PROGRESS | 2026-09-18 | — | PASS for win/loss/tie and injected quote paths | merged main | — | Resale policy is now approved; production wiring and revalidation remain. |
+| BM-04 | Settlement, liquidation, bankruptcy | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, settlement/liquidation/bankruptcy and authoritative resale cases | working tree | ENV-BM-01 for final release gate | Shared `ModifierResalePolicy` now drives emergency liquidation and exact-zero/debt outcomes without injected production quotes. |
 | BM-05 | Modifier definitions, instances, capacity, placement | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 5 targeted cases | merged main | BM-B08 for later authored multi-upgrade behavior | Registry, locations, capacities, reserve inactivity, and attachment-index invariants are implemented; duplicate-definition policy is now approved. |
 | BM-06 | Typed modifier seams and content validation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 3 targeted cases | working tree | Later seams only | Wider Choice is real; future modifier behavior remains seams only. |
-| BM-07 | Reward generation and Wider Choice | IN PROGRESS | 2026-09-18 | — | PASS, 8 targeted cases before policy lock | merged main | — | Full-pool 3-offer policy and Wider Choice 4-offer rule are approved; production configuration and revalidation remain. |
-| BM-08 | Reward selection/refusal/acquisition | IN PROGRESS | 2026-09-18 | — | PASS, 6 targeted cases before policy lock | merged main | BM-B07 only if real Card Upgrade targeting is introduced | Full-capacity reward replacement/refusal policy is approved; implementation and revalidation remain. |
-| BM-09 | Carry management transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, carry/attachment cases | working tree | BM-B08 for final attachment behavior | Active/reserve movement is authoritative; unresolved Card Upgrade actions reject precisely. |
+| BM-07 | Reward generation and Wider Choice | IN PROGRESS | 2026-09-18 | — | PASS, reward suite and full suite 110/110 under Godot 4.7.1 | working tree | CONTENT-BM-01, ENV-BM-01 | Approved defaults, full-pool 3 offers, Wider Choice 4 offers, exclusion, persistence, and deterministic generation are wired; production authored content is still insufficient for a fresh three-offer run. |
+| BM-08 | Reward selection/refusal/acquisition | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, pending replacement/refusal, atomic rejection, save/replay cases | working tree | BM-B07 only if real Card Upgrade targeting is introduced | Full-capacity reward replacement sells through the shared resale authority, or refusal grants +2; no overflow inventory exists. |
+| BM-09 | Carry management transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, carry/attachment cases | working tree | BM-B08 for later multi-type attachment policy | Active/reserve movement and one-instance/one-physical-card attachment are authoritative; later different-type stacking remains a seam. |
 | BM-10 | Save format v1 and migration | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 4 targeted cases | working tree | — | Checksummed envelope, migration fixture, journal, and phase round-trips pass. |
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | working tree | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | working tree | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
-| BM-13 | Shop transactions | IN PROGRESS | 2026-09-18 | — | PASS under injected policy before lock, 5 targeted cases | merged main | — | Full-storage purchase blocking and resale formulas are approved; production wiring and revalidation remain. |
+| BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll cases | working tree | ENV-BM-01 for final release gate | Full storage blocks purchase without consuming currency/offer; sale uses the same authoritative resale policy. |
 | BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 8 card-motion cases | working tree | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; full visual acceptance remains. |
-| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 6 between-month UI cases before policy lock | merged main | — | Shared shell exists; approved full-capacity replacement flow must now replace the temporary policy-blocker presentation and be visually validated. |
-| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | Targeted domain/UI coverage only | merged main | — | Shop grid/finalization controls are wired; approved capacity/resale policies must be surfaced and validated. |
+| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, updated between-month UI suite under Godot 4.7.1 | working tree | CONTENT-BM-01, UX-BM-01 | Shared shell now presents authoritative liquidation quotes and full-capacity replacement/refusal actions; native visual acceptance remains. |
+| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, updated integration/UI coverage under Godot 4.7.1 | working tree | CONTENT-BM-01, UX-BM-01 | Six category slots, sale, buy rejection, reroll, and finalization controls are wired; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | working tree | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | Partial: 2 integration cases plus 103/103 full suite under Godot 4.7.1 | merged main | Godot 4.7.2 preflight and native visual inspection | Design-policy blockers are resolved. Approved policies must be wired/revalidated, then exact-engine and visual/renderer acceptance remain. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 110/110 across 21 suites under Godot 4.7.1 | working tree | ENV-BM-01, UX-BM-01, CONTENT-BM-01 | Approved policy implementation is green under the available engine; exact-engine, native visual, and authored-content acceptance remain. |
 
 ## Design blocker register
 
@@ -78,7 +93,7 @@ Record reversible engineering choices here, such as file placement, schema
 version increments, test fixture names, or presentation token values. Do not
 record new gameplay canon here; use the blocker register and approved authority.
 
-Approved gameplay canon is recorded here only as a synchronization note; the canonical source remains the Game Design Authority.
+Approved gameplay canon is recorded here only as a synchronization note from the continuation objective, merged repository authority notes, and the canonical Game Design Authority read on 2026-09-18. This repository remains an implementation record, not a replacement design-authority document.
 
 - 2026-09-18 policy lock: monthly free rewards are 3 offers from the full eligible modifier pool; Wider Choice changes the count to 4 without family quotas.
 - 2026-09-18 policy lock: duplicate Hand/Mechanic and Strategic/Meta modifier definitions are disallowed by default unless explicitly stackable; Card Upgrade types may recur on different physical cards but not duplicate on the same card unless explicitly allowed.
@@ -86,12 +101,15 @@ Approved gameplay canon is recorded here only as a synchronization note; the can
 - 2026-09-18 policy lock: a shop purchase at full storage is blocked until the player creates legal space; there is no automatic replacement or pending-purchase inventory.
 - 2026-09-18 policy lock: purchased modifiers resell for 50% of actual purchase price rounded down; free rewards resell for 50% of normal base shop value rounded down.
 - Run state uses canonical sorted arrays for hashes while raw dictionaries remain in `to_dict()` so transaction cloning preserves keyed ownership data.
-- Pre-approval liquidation and sale pricing used injected `Callable` policies. Continuation work must make the approved resale formulas the production defaults while retaining deterministic testability.
+- Resale pricing now lives in `ModifierResalePolicy`; test fixtures may still construct explicit instance economics, but normal production actions do not require an injected quote provider.
 - Shop slots persist unavailable offers when the current registry has no approved content for a category; no placeholder gameplay modifier was invented.
 - Debug scenarios construct valid states, but all subsequent changes still go through `RunController.submit_action()`.
 - The January result payload preserves the existing terminal-result shape and adds a typed `match_result` bridge for the between-month screen.
-- The pre-approval RunRules path persisted empty reward/duplicate-policy fields. Continuation work must replace those empty production defaults with the approved full-pool and duplicate rules while preserving configuration/fixture injection for tests. Active Wider Choice remains derived only from an active owned instance so reserve placement cannot affect reward count.
-- End-to-end integration fixtures previously injected temporary test policies. Continuation work must prove the same win/liquidation paths using the approved production defaults, while preserving replay hash convergence.
+- `RunRules` now defaults and normalizes the approved full-pool reward and duplicate-definition policies; active Wider Choice remains derived only from an active owned instance so reserve placement cannot affect reward count.
+- End-to-end integration fixtures now exercise the shared production resale authority and preserve replay hash convergence.
+- Full-capacity reward replacement is represented as persisted `RewardState.pending_acquisition`, with `REPLACE_PENDING_REWARD` and `REFUSE_REWARD` as the only completion paths.
+- Production modifier-content readiness is reported as a warning rather than failing structural validation while the roadmap-deferred catalogue remains incomplete; seam definitions are never treated as playable content.
+- 2026-09-18 authority audit: authenticated read of the canonical Game Design Authority confirmed the approved prototype reward/carry/shop/resale rules and the named modifier effects; BM-B07/B08/B09/B10/B11 remain unresolved at their narrower execution boundaries, while BM-B12 remains non-blocking for this milestone.
 
 ## Validation log
 
@@ -113,11 +131,16 @@ Append-only entries in the format:
 - 2026-09-18 — BM-15 causal UI checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests/integration/test_between_month_ui.gd --ignoreHeadlessMode` — PASS — 6/6 score/debt-summary, blocker, reward-generation, shop-entry, and carry-focus cases — working tree
 - 2026-09-18 — BM-18 integration checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests/integration/test_between_month_run_loop.gd --ignoreHeadlessMode` — PASS — 2/2 configured win and injected-liquidation paths reach the February placeholder and replay to the same final hash — working tree
 - 2026-09-18 — full-suite checkpoint — `scripts/run/validate_project.ps1 -GodotBinary <Godot 4.7.1 console>` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, and 103/103 GdUnit4 cases across 21 suites — working tree
+- 2026-09-18 — BM-04/BM-07/BM-08/BM-13 continuation checkpoint — targeted run/reward/carry/settlement/shop/save suites — PASS — approved defaults, shared resale, full-capacity replacement/refusal, Card Upgrade physical targeting, and pending reward save/load cases pass — working tree
+- 2026-09-18 — full-suite continuation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — 110/110 GdUnit4 cases across 21 suites; validator also reports the authored reward-content readiness warning — working tree
+- 2026-09-18 — BM-15/BM-16 presentation hardening checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary <Godot 4.7.1 console> -a res://tests/integration/test_between_month_ui.gd --ignoreHeadlessMode` plus full validator — PASS (provisional Godot 4.7.1) — accepted shop purchase/sale/reroll event messages remain visible after re-render; 6/6 focused UI cases and 110/110 full cases pass — working tree
+- 2026-09-18 — exact-engine/native inspection preflight — Godot 4.7.2 search and native CUA inspection — NOT AVAILABLE — no Godot 4.7.2 executable found and no interactive/native Godot surface was exposed — ENV-BM-01 / UX-BM-01
 
 ## Known deferred work
 
 - February gameplay and later Moon rules.
 - Full modifier catalogue and unresolved modifier behavior.
+- Authored eligible reward catalogue content sufficient for the approved three-offer production pool; seam definitions remain excluded.
 - Multiplayer, networking, cloud saves, and production telemetry.
 - Generic ability/event frameworks, ECS, database, generic inventory, or second
   rules engine.
@@ -142,5 +165,6 @@ Append-only entries in the format:
   speed modes, cancellation, and presentation convergence are verified.
 - Compatibility-renderer profiling and 720p/higher-resolution inspection pass.
 - Full repository validation passes with the discovered Godot 4.7.2 binary.
+- Production modifier content supplies enough authored eligible definitions for the approved persisted three-offer reward pool; no deferred seam is used as filler.
 - All current design blockers are resolved or the milestone is explicitly
   stopped with the blocker recorded; no unresolved rule is invented.

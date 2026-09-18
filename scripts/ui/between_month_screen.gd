@@ -86,6 +86,7 @@ func _phase_title() -> String:
 		RunState.PHASE_SHOP: return "SHOP"
 		RunState.PHASE_FINALIZE: return "FINALIZE BUILD"
 		RunState.PHASE_TRANSITION: return "MONTH TRANSITION"
+		RunState.PHASE_BANKRUPT: return "BANKRUPT"
 		RunState.PHASE_FEBRUARY_PLACEHOLDER: return "FEBRUARY PLACEHOLDER"
 	return run_controller.state.phase.to_upper().replace("_", " ")
 
@@ -97,29 +98,33 @@ func _render_phase() -> void:
 			_add_action("SETTLE JANUARY", "settle", RunAction.new(RunAction.SETTLE))
 		RunState.PHASE_LIQUIDATION:
 			var pending := PendingSettlement.from_dict(run_controller.state.pending_settlement)
-			status_label.text = "January loss requires $%d more to settle. %d owned modifier(s) remain available for an approved liquidation quote. The run is stopped at BM-B05 rather than guessing a sale value." % [pending.amount_due, run_controller.state.active_count() + run_controller.state.reserve_count()]
+			status_label.text = "January loss requires $%d more. Select an owned modifier to liquidate at its authoritative resale value." % pending.amount_due
 			status_label.add_theme_color_override("font_color", ERROR)
+			_render_liquidation()
 		RunState.PHASE_REWARD:
 			var reward := RewardState.from_dict(run_controller.state.reward_state)
 			if not reward.generated:
-				var rules := run_controller.state.rules()
-				if rules.reward_policy.is_empty() or rules.duplicate_modifier_policy.is_empty():
-					status_label.text = "Reward offers cannot be generated until Sterling selects the reward policy and duplicate policy (BM-B01/BM-B02)."
-					status_label.add_theme_color_override("font_color", ERROR)
-				else:
-					status_label.text = "The configured reward policy is ready to generate deterministic persisted offers."
-					_add_action("GENERATE REWARD", "generate_reward", RunAction.new(RunAction.GENERATE_REWARD))
+				status_label.text = "Generate three persisted offers from the eligible modifier pool. Wider Choice makes this four."
+				_add_action("GENERATE REWARD", "generate_reward", RunAction.new(RunAction.GENERATE_REWARD))
 			else:
-				status_label.text = "Choose one persisted offer or refuse it for the configured cash value."
-				for raw_offer in reward.offers:
-					var offer := RewardOffer.from_dict(raw_offer)
-					_add_action("%s  [%s]" % [offer.definition_id, offer.offer_id], "reward_%s" % offer.offer_id, RunAction.new(RunAction.CHOOSE_REWARD, 0, {"offer_id": offer.offer_id}))
+				status_label.text = "Choose one persisted offer or refuse it for +$%d." % run_controller.state.rules().reward_refusal_cash
+				if not reward.selection_committed:
+					for raw_offer in reward.offers:
+						var offer := RewardOffer.from_dict(raw_offer)
+						_add_action("%s  [%s]" % [offer.definition_id, offer.offer_id], "reward_%s" % offer.offer_id, RunAction.new(RunAction.CHOOSE_REWARD, 0, {"offer_id": offer.offer_id}))
 				if not reward.selection_committed:
 					_add_action("REFUSE REWARD", "refuse_reward", RunAction.new(RunAction.REFUSE_REWARD))
 		RunState.PHASE_CARRY:
-			status_label.text = "Select a modifier, inspect its description, then choose an active or reserve destination. Drag is optional; the action is authoritative."
-			_render_carry()
-			_add_action("OPEN SIX-SLOT SHOP", "enter_shop", RunAction.new(RunAction.ENTER_SHOP, 0, {"duplicate_policy": ""}))
+			var carry_reward := RewardState.from_dict(run_controller.state.reward_state)
+			if not carry_reward.pending_acquisition.is_empty():
+				status_label.text = "Carry is full. Replace and sell one owned modifier, or refuse the selected reward for +$%d." % run_controller.state.rules().reward_refusal_cash
+				_render_carry()
+				_render_pending_reward(carry_reward)
+				_add_action("REFUSE REWARD", "refuse_pending_reward", RunAction.new(RunAction.REFUSE_REWARD))
+			else:
+				status_label.text = _last_event_message("Select a modifier, inspect its description, then choose an active or reserve destination.")
+				_render_carry()
+				_add_action("OPEN SIX-SLOT SHOP", "enter_shop", RunAction.new(RunAction.ENTER_SHOP))
 		RunState.PHASE_SHOP:
 			_render_shop()
 		RunState.PHASE_FINALIZE:
@@ -132,10 +137,13 @@ func _render_phase() -> void:
 			status_label.text = "Snow Moon placeholder reached. February gameplay is explicitly deferred by the roadmap."
 			status_label.add_theme_color_override("font_color", MUTED)
 			february_placeholder_reached.emit()
+		RunState.PHASE_BANKRUPT:
+			status_label.text = "The January settlement cannot be completed. This run is bankrupt."
+			status_label.add_theme_color_override("font_color", ERROR)
 
 func _render_shop() -> void:
 	var shop := ShopState.from_dict(run_controller.state.shop_state)
-	status_label.text = "Offers persist until purchased or rerolled. Routine transactions stay quiet and keep the carry tray visible."
+	status_label.text = _last_event_message("Offers persist until purchased or rerolled. Routine transactions stay quiet and keep the carry tray visible.")
 	var grid := GridContainer.new()
 	grid.columns = 3
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -146,7 +154,7 @@ func _render_shop() -> void:
 		var offer := ShopOffer.from_dict(raw_offer)
 		var button := Button.new()
 		button.name = "Shop_%s" % offer.slot_id
-		button.text = "%s\n%s\n%s" % [offer.slot_id.to_upper().replace("_", " "), offer.definition_id if offer.available else "UNAVAILABLE", ("$%d" % offer.price) if offer.available else "policy/content pending"]
+		button.text = "%s\n%s\n%s" % [offer.slot_id.to_upper().replace("_", " "), offer.definition_id if offer.available else "UNAVAILABLE", ("$%d" % offer.price) if offer.available else "content pending"]
 		button.custom_minimum_size = Vector2(0, 84)
 		button.disabled = not offer.available or offer.consumed
 		button.focus_mode = Control.FOCUS_ALL
@@ -157,6 +165,15 @@ func _render_shop() -> void:
 	_render_shop_owned(run_controller.state.reserve_modifier_ids)
 	_add_action("REROLL SHOP", "reroll", RunAction.new(RunAction.REROLL_SHOP, 0, {"duplicate_policy": ""}))
 	_add_action("EXIT SHOP", "exit_shop", RunAction.new(RunAction.EXIT_SHOP))
+
+func _render_liquidation() -> void:
+	for raw_instance_id in run_controller.state.active_modifier_ids + run_controller.state.reserve_modifier_ids:
+		var instance_id := String(raw_instance_id)
+		var instance: Dictionary = run_controller.state.modifier_instances.get(instance_id, {})
+		var proceeds := ModifierResalePolicy.quote(instance, run_controller.modifier_registry)
+		if proceeds < 0:
+			continue
+		_add_action("LIQUIDATE %s  (+$%d)" % [_modifier_description(instance_id), proceeds], "liquidate_%s" % instance_id, RunAction.new(RunAction.LIQUIDATE, 0, {"instance_id": instance_id}))
 
 func _render_shop_owned(instance_ids: Array) -> void:
 	for raw_instance_id in instance_ids:
@@ -182,6 +199,17 @@ func _render_carry() -> void:
 	_render_modifier_location(run_controller.state.active_modifier_ids, "reserve")
 	_add_label(content_column, "RESERVE MODIFIERS", 18, GOLD, false)
 	_render_modifier_location(run_controller.state.reserve_modifier_ids, "active")
+
+func _render_pending_reward(reward: RewardState) -> void:
+	var offer := RewardOffer.from_dict(reward.pending_acquisition.get("offer", {}))
+	_add_label(content_column, "SELECTED REWARD: %s" % offer.definition_id, 17, GOLD, false)
+	for raw_instance_id in run_controller.state.active_modifier_ids + run_controller.state.reserve_modifier_ids:
+		var instance_id := String(raw_instance_id)
+		var instance: Dictionary = run_controller.state.modifier_instances.get(instance_id, {})
+		var proceeds := ModifierResalePolicy.quote(instance, run_controller.modifier_registry)
+		if proceeds < 0 or not Array(instance.get("attached_card_ids", [])).is_empty():
+			continue
+		_add_action("REPLACE %s  (+$%d)" % [_modifier_description(instance_id), proceeds], "replace_%s" % instance_id, RunAction.new(RunAction.REPLACE_PENDING_REWARD, 0, {"instance_id": instance_id}))
 
 func _render_modifier_location(instance_ids: Array, destination: String) -> void:
 	if instance_ids.is_empty():
@@ -216,6 +244,10 @@ func _modifier_description(instance_id: String) -> String:
 		var definition := registry.get_definition(definition_id)
 		return "%s — %s" % [definition_id, definition.description]
 	return definition_id
+
+func _last_event_message(fallback: String) -> String:
+	var message := String(run_controller.state.last_event.get("message", ""))
+	return message if not message.is_empty() else fallback
 
 func _add_action(text_value: String, key: String, action: RunAction) -> void:
 	var button := Button.new()

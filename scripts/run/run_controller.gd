@@ -4,7 +4,6 @@ extends RefCounted
 var state: RunState
 var journal: RunJournal
 var postcondition_probe: Callable = Callable()
-var liquidation_quote_provider: Callable = Callable()
 var modifier_registry: ModifierRegistry
 var card_catalog: CardCatalog
 
@@ -42,7 +41,6 @@ func replay_final_hash() -> String:
 	var replay_state := RunState.from_dict(journal.initial_state)
 	var replay := RunController.new(journal.root_seed, replay_state, null, card_catalog)
 	replay.modifier_registry = modifier_registry
-	replay.liquidation_quote_provider = liquidation_quote_provider
 	for raw_entry in journal.entries:
 		if not raw_entry is Dictionary:
 			return ""
@@ -75,9 +73,11 @@ func _is_legal_action(action: RunAction) -> bool:
 			return state.phase == RunState.PHASE_SETTLEMENT
 		RunAction.LIQUIDATE:
 			return state.phase == RunState.PHASE_LIQUIDATION
-		RunAction.GENERATE_REWARD, RunAction.CHOOSE_REWARD, RunAction.REFUSE_REWARD:
+		RunAction.GENERATE_REWARD, RunAction.CHOOSE_REWARD:
 			return state.phase == RunState.PHASE_REWARD
-		RunAction.PLACE_PENDING_ACQUISITION:
+		RunAction.REFUSE_REWARD:
+			return state.phase == RunState.PHASE_REWARD or (state.phase == RunState.PHASE_CARRY and not RewardState.from_dict(state.reward_state).pending_acquisition.is_empty())
+		RunAction.PLACE_PENDING_ACQUISITION, RunAction.REPLACE_PENDING_REWARD:
 			return state.phase == RunState.PHASE_CARRY
 		RunAction.MOVE_MODIFIER:
 			return state.phase == RunState.PHASE_CARRY or state.phase == RunState.PHASE_SHOP
@@ -109,6 +109,8 @@ func _apply_action(candidate: RunState, action: RunAction) -> Dictionary:
 			return _apply_refuse_reward(candidate)
 		RunAction.PLACE_PENDING_ACQUISITION:
 			return _apply_place_pending(candidate, action)
+		RunAction.REPLACE_PENDING_REWARD:
+			return _apply_replace_pending_reward(candidate, action)
 		RunAction.MOVE_MODIFIER:
 			return _apply_move_modifier(candidate, action)
 		RunAction.ATTACH_CARD_UPGRADE, RunAction.DETACH_CARD_UPGRADE:
@@ -160,22 +162,23 @@ func _apply_generate_reward(candidate: RunState, action: RunAction) -> Dictionar
 	if request_data.is_empty():
 		var configured_policy := candidate.rules().reward_policy
 		var configured_duplicates := candidate.rules().duplicate_modifier_policy
-		if configured_policy.is_empty():
-			return {"ok": false, "reason": "Reward policy is not configured; Sterling approval BM-B01 is required"}
-		if configured_duplicates.is_empty():
-			return {"ok": false, "reason": "Duplicate modifier policy is not configured; Sterling approval BM-B02 is required"}
 		if configured_policy == RunRules.REWARD_POLICY_WHOLE_POOL:
 			request = RewardRequest.whole_pool(candidate.month, configured_duplicates)
 		elif configured_policy == RunRules.REWARD_POLICY_FAMILY_QUOTAS:
 			request = RewardRequest.family_quotas(candidate.month, configured_duplicates)
 		else:
-			return {"ok": false, "reason": "Reward policy is invalid; Sterling approval BM-B01 is required"}
+			return {"ok": false, "reason": "Reward policy is invalid"}
 		request.generation_id = int(candidate.generation_counters.get("reward", 0))
 	else:
 		if request.reward_policy.is_empty():
-			return {"ok": false, "reason": "Reward policy is not configured; Sterling approval BM-B01 is required"}
+			request.reward_policy = candidate.rules().reward_policy
 		if request.duplicate_policy.is_empty():
-			return {"ok": false, "reason": "Duplicate modifier policy is not configured; Sterling approval BM-B02 is required"}
+			request.duplicate_policy = candidate.rules().duplicate_modifier_policy
+		if request.generation_id == 0:
+			request.generation_id = int(candidate.generation_counters.get("reward", 0))
+	for definition_id in _owned_nonstackable_definition_ids(candidate):
+		if not request.excluded_definition_ids.has(definition_id):
+			request.excluded_definition_ids.append(definition_id)
 	if bool(action.payload.get("wider_choice", false)) or candidate.rules().reward_wider_choice or _active_has_definition(candidate, "wider_choice"):
 		request = request.with_wider_choice()
 	var generated := RewardGenerator.generate(request, candidate.root_seed, modifier_registry)
@@ -193,7 +196,7 @@ func _apply_generate_reward(candidate: RunState, action: RunAction) -> Dictionar
 
 func _apply_choose_reward(candidate: RunState, action: RunAction) -> Dictionary:
 	var reward := RewardState.from_dict(candidate.reward_state)
-	if not reward.generated or reward.selection_committed:
+	if not reward.generated or reward.selection_committed or not reward.pending_acquisition.is_empty():
 		return {"ok": false, "reason": "Reward selection is not available"}
 	var offer_id := String(action.payload.get("offer_id", ""))
 	var offer_index := _reward_offer_index(reward.offers, offer_id)
@@ -202,18 +205,15 @@ func _apply_choose_reward(candidate: RunState, action: RunAction) -> Dictionary:
 	var offer := RewardOffer.from_dict(reward.offers[offer_index])
 	if offer.consumed:
 		return {"ok": false, "reason": "Reward offer has already been consumed"}
-	offer.consumed = true
-	reward.offers[offer_index] = offer.to_dict()
-	reward.selection_committed = true
-	reward.selected_offer_id = offer.offer_id
 	if _carry_is_full(candidate):
-		reward.pending_acquisition = {"offer": offer.to_dict(), "reason": "active_and_reserve_capacity_full"}
+		reward.selected_offer_id = offer.offer_id
+		reward.pending_acquisition = {"offer": offer.to_dict(), "reason": "replace_and_sell_or_refuse"}
 		candidate.reward_state = reward.to_dict()
 		candidate.phase = RunState.PHASE_CARRY
 		candidate.last_event = {
 			"kind": "reward_pending_acquisition",
 			"offer_id": offer.offer_id,
-			"message": "Reward is selected but both carry locations are full; placement policy is required."
+			"message": "Reward is selected; replace and sell one owned modifier or refuse the reward."
 		}
 		return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 	var destination := String(action.payload.get("destination", ""))
@@ -222,6 +222,10 @@ func _apply_choose_reward(candidate: RunState, action: RunAction) -> Dictionary:
 	var placement := _materialize_reward(candidate, offer, destination)
 	if not bool(placement.get("ok", false)):
 		return placement
+	offer.consumed = true
+	reward.offers[offer_index] = offer.to_dict()
+	reward.selection_committed = true
+	reward.selected_offer_id = offer.offer_id
 	reward.pending_acquisition = {}
 	candidate.reward_state = reward.to_dict()
 	candidate.phase = RunState.PHASE_CARRY
@@ -238,6 +242,14 @@ func _apply_refuse_reward(candidate: RunState) -> Dictionary:
 	var reward := RewardState.from_dict(candidate.reward_state)
 	if not reward.generated or reward.selection_committed:
 		return {"ok": false, "reason": "Reward refusal is not available"}
+	if not reward.pending_acquisition.is_empty():
+		var pending_offer := RewardOffer.from_dict(reward.pending_acquisition.get("offer", {}))
+		var pending_index := _reward_offer_index(reward.offers, pending_offer.offer_id)
+		if pending_index >= 0:
+			pending_offer.consumed = true
+			reward.offers[pending_index] = pending_offer.to_dict()
+		reward.pending_acquisition = {}
+	reward.selected_offer_id = ""
 	reward.selection_committed = true
 	reward.refused = true
 	candidate.reward_state = reward.to_dict()
@@ -255,6 +267,8 @@ func _apply_place_pending(candidate: RunState, action: RunAction) -> Dictionary:
 	var reward := RewardState.from_dict(candidate.reward_state)
 	if reward.pending_acquisition.is_empty():
 		return {"ok": false, "reason": "There is no pending reward acquisition"}
+	if String(reward.pending_acquisition.get("reason", "")) == "replace_and_sell_or_refuse":
+		return {"ok": false, "reason": "A full carry requires replacing and selling an owned modifier or refusing the reward"}
 	var raw_offer = reward.pending_acquisition.get("offer", {})
 	if not raw_offer is Dictionary:
 		return {"ok": false, "reason": "Pending reward offer is malformed"}
@@ -273,6 +287,49 @@ func _apply_place_pending(candidate: RunState, action: RunAction) -> Dictionary:
 	}
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
+func _apply_replace_pending_reward(candidate: RunState, action: RunAction) -> Dictionary:
+	var reward := RewardState.from_dict(candidate.reward_state)
+	if reward.pending_acquisition.is_empty():
+		return {"ok": false, "reason": "There is no full-capacity reward awaiting replacement"}
+	var raw_offer = reward.pending_acquisition.get("offer", {})
+	if not raw_offer is Dictionary:
+		return {"ok": false, "reason": "Pending reward offer is malformed"}
+	var offer := RewardOffer.from_dict(raw_offer)
+	var old_instance_id := String(action.payload.get("instance_id", ""))
+	if old_instance_id.is_empty() or not candidate.modifier_instances.has(old_instance_id):
+		return {"ok": false, "reason": "Replacement target is not an owned modifier"}
+	var old_instance: Dictionary = candidate.modifier_instances[old_instance_id]
+	var proceeds := ModifierResalePolicy.quote(old_instance, modifier_registry)
+	if proceeds < 0:
+		return {"ok": false, "reason": "Replacement target is not currently saleable"}
+	if not Array(old_instance.get("attached_card_ids", [])).is_empty():
+		return {"ok": false, "reason": "An attached modifier must be detached before replacement"}
+	var destination := String(action.payload.get("destination", old_instance.get("location", "")))
+	_remove_modifier(candidate, old_instance_id)
+	var placement := _materialize_reward(candidate, offer, destination)
+	if not bool(placement.get("ok", false)):
+		return placement
+	var offer_index := _reward_offer_index(reward.offers, offer.offer_id)
+	if offer_index >= 0:
+		offer.consumed = true
+		reward.offers[offer_index] = offer.to_dict()
+	reward.pending_acquisition = {}
+	reward.selection_committed = true
+	reward.selected_offer_id = offer.offer_id
+	candidate.bankroll += proceeds
+	candidate.reward_state = reward.to_dict()
+	candidate.last_event = {
+		"kind": "reward_replaced",
+		"offer_id": offer.offer_id,
+		"removed_instance_id": old_instance_id,
+		"instance_id": String(placement.get("instance_id", "")),
+		"proceeds": proceeds,
+		"destination": destination,
+		"bankroll": candidate.bankroll,
+		"message": "Owned modifier sold and selected reward placed in the freed carry slot."
+	}
+	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
+
 func _materialize_reward(candidate: RunState, offer: RewardOffer, destination: String) -> Dictionary:
 	if destination != "active" and destination != "reserve":
 		return {"ok": false, "reason": "Reward destination is invalid"}
@@ -283,14 +340,10 @@ func _materialize_reward(candidate: RunState, offer: RewardOffer, destination: S
 	var instance_id := "modifier_%s" % offer.offer_id
 	if candidate.modifier_instances.has(instance_id):
 		return {"ok": false, "reason": "Reward instance ID already exists"}
-	candidate.modifier_instances[instance_id] = {
-		"instance_id": instance_id,
-		"definition_id": offer.definition_id,
-		"location": destination,
-		"source": offer.source,
-		"acquired_month": candidate.month,
-		"attached_card_ids": []
-	}
+	var instance := _new_modifier_instance(candidate, offer.definition_id, destination, offer.source, instance_id, 0)
+	if not bool(instance.get("ok", false)):
+		return instance
+	candidate.modifier_instances[instance_id] = instance["instance"]
 	if destination == "active":
 		candidate.active_modifier_ids.append(instance_id)
 	else:
@@ -307,6 +360,56 @@ func _active_has_definition(candidate: RunState, definition_id: String) -> bool:
 		if raw_instance is Dictionary and String(raw_instance.get("definition_id", "")) == definition_id:
 			return true
 	return false
+
+func _owned_nonstackable_definition_ids(candidate: RunState) -> Array:
+	var result: Array = []
+	for raw_instance_id in candidate.modifier_instances.keys():
+		var instance: Dictionary = candidate.modifier_instances[raw_instance_id]
+		var definition := modifier_registry.get_definition(String(instance.get("definition_id", ""))) if modifier_registry != null else null
+		if definition != null and not definition.stackable and (definition.family == "hand_mechanic" or definition.family == "strategic_meta"):
+			if not result.has(definition.definition_id):
+				result.append(definition.definition_id)
+	return result
+
+func _can_acquire_definition(candidate: RunState, definition_id: String, target_card_id: String = "") -> Dictionary:
+	var definition := modifier_registry.get_definition(definition_id) if modifier_registry != null else null
+	if definition == null:
+		return {"ok": false, "reason": "Modifier definition is not registered"}
+	if definition.family == "hand_mechanic" or definition.family == "strategic_meta":
+		if not definition.stackable:
+			for raw_instance in candidate.modifier_instances.values():
+				if String(raw_instance.get("definition_id", "")) == definition_id:
+					return {"ok": false, "reason": "Duplicate Hand/Mechanic or Strategic/Meta modifier is not allowed"}
+	if definition.family == "card_upgrade" and not target_card_id.is_empty() and not definition.allow_same_card_stack:
+		for raw_instance_id in Array(candidate.card_upgrade_attachments.get(target_card_id, [])):
+			var attached: Dictionary = candidate.modifier_instances.get(String(raw_instance_id), {})
+			if String(attached.get("definition_id", "")) == definition_id:
+				return {"ok": false, "reason": "The same Card Upgrade type cannot be attached to the same physical card"}
+	return {"ok": true}
+
+func _new_modifier_instance(candidate: RunState, definition_id: String, destination: String, source: String, stable_suffix: String, purchase_price: int) -> Dictionary:
+	var acquisition := _can_acquire_definition(candidate, definition_id)
+	if not bool(acquisition.get("ok", false)):
+		return acquisition
+	var definition := modifier_registry.get_definition(definition_id)
+	if definition == null:
+		return {"ok": false, "reason": "Modifier definition is not registered"}
+	var instance_id := "modifier_%s" % stable_suffix
+	if candidate.modifier_instances.has(instance_id):
+		return {"ok": false, "reason": "Modifier instance ID already exists"}
+	return {
+		"ok": true,
+		"instance": {
+			"instance_id": instance_id,
+			"definition_id": definition_id,
+			"location": destination,
+			"source": source,
+			"acquired_month": candidate.month,
+			"attached_card_ids": [],
+			"purchase_price": maxi(0, purchase_price) if source == "shop" else 0,
+			"base_shop_price": definition.base_shop_price
+		}
+	}
 
 func _reward_offer_index(offers: Array, offer_id: String) -> int:
 	for index in range(offers.size()):
@@ -352,19 +455,26 @@ func _apply_settlement(candidate: RunState) -> Dictionary:
 	pending.ai_score = ai_score
 	pending.source_result = result.to_dict()
 	candidate.pending_settlement = pending.to_dict()
-	candidate.phase = RunState.PHASE_LIQUIDATION
-	candidate.last_event = {
-		"kind": "liquidation_required",
-		"match_id": result.match_id,
-		"amount_due": amount_due,
-		"bankroll": candidate.bankroll,
-		"message": "January loss requires legal liquidation before reward selection."
-	}
+	if _has_saleable_modifier(candidate):
+		candidate.phase = RunState.PHASE_LIQUIDATION
+		candidate.last_event = {
+			"kind": "liquidation_required",
+			"match_id": result.match_id,
+			"amount_due": amount_due,
+			"bankroll": candidate.bankroll,
+			"message": "January loss requires legal liquidation before reward selection."
+		}
+	else:
+		candidate.phase = RunState.PHASE_BANKRUPT
+		candidate.last_event = {
+			"kind": "bankrupt",
+			"match_id": result.match_id,
+			"remaining_due": amount_due,
+			"message": "January settlement cannot be paid and no owned modifier is legally saleable."
+		}
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
 func _apply_liquidation(candidate: RunState, action: RunAction) -> Dictionary:
-	if not liquidation_quote_provider.is_valid():
-		return {"ok": false, "reason": "Liquidation resale policy is not configured; Sterling approval BM-B05 is required"}
 	var instance_id := String(action.payload.get("instance_id", ""))
 	if instance_id.is_empty() or not candidate.modifier_instances.has(instance_id):
 		return {"ok": false, "reason": "Liquidation target is not an owned modifier"}
@@ -375,8 +485,10 @@ func _apply_liquidation(candidate: RunState, action: RunAction) -> Dictionary:
 		location = "reserve"
 	if location.is_empty():
 		return {"ok": false, "reason": "Liquidation target has no legal location"}
-	var quote_variant = liquidation_quote_provider.call(instance_id, candidate)
-	var proceeds := int(quote_variant)
+	var instance: Dictionary = candidate.modifier_instances[instance_id]
+	if not Array(instance.get("attached_card_ids", [])).is_empty():
+		return {"ok": false, "reason": "An attached modifier must be detached before liquidation"}
+	var proceeds := ModifierResalePolicy.quote(instance, modifier_registry)
 	if proceeds < 0:
 		return {"ok": false, "reason": "Liquidation target is not currently saleable"}
 	var pending := PendingSettlement.from_dict(candidate.pending_settlement)
@@ -428,10 +540,12 @@ func _complete_settlement(candidate: RunState, result: MatchResult) -> void:
 
 func _has_saleable_modifier(candidate: RunState) -> bool:
 	for raw_id in candidate.active_modifier_ids:
-		if int(liquidation_quote_provider.call(String(raw_id), candidate)) >= 0:
+		var instance: Dictionary = candidate.modifier_instances.get(String(raw_id), {})
+		if Array(instance.get("attached_card_ids", [])).is_empty() and ModifierResalePolicy.quote(instance, modifier_registry) >= 0:
 			return true
 	for raw_id in candidate.reserve_modifier_ids:
-		if int(liquidation_quote_provider.call(String(raw_id), candidate)) >= 0:
+		var instance: Dictionary = candidate.modifier_instances.get(String(raw_id), {})
+		if Array(instance.get("attached_card_ids", [])).is_empty() and ModifierResalePolicy.quote(instance, modifier_registry) >= 0:
 			return true
 	return false
 
@@ -471,19 +585,68 @@ func _apply_move_modifier(candidate: RunState, action: RunAction) -> Dictionary:
 	}
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
-func _apply_card_upgrade_attachment(_candidate: RunState, action: RunAction) -> Dictionary:
-	var reason := "Card Upgrade target generation and attachment stacking require Sterling approval BM-B07/BM-B08"
-	if action.action_type == RunAction.DETACH_CARD_UPGRADE:
-		reason = "Card Upgrade detachment semantics require Sterling approval BM-B07/BM-B08"
-	return {"ok": false, "reason": reason}
+func _apply_card_upgrade_attachment(candidate: RunState, action: RunAction) -> Dictionary:
+	var instance_id := String(action.payload.get("instance_id", ""))
+	var card_id := String(action.payload.get("card_id", ""))
+	if instance_id.is_empty() or not candidate.modifier_instances.has(instance_id):
+		return {"ok": false, "reason": "Card Upgrade instance is not owned"}
+	if card_id.is_empty():
+		return {"ok": false, "reason": "A physical hanafuda card target is required"}
+	if card_catalog != null and not card_catalog.has_card(card_id):
+		return {"ok": false, "reason": "Card Upgrade target is not a known physical card"}
+	var instance: Dictionary = candidate.modifier_instances[instance_id]
+	var definition := modifier_registry.get_definition(String(instance.get("definition_id", "")))
+	if definition == null or definition.family != "card_upgrade":
+		return {"ok": false, "reason": "Only Card Upgrade modifiers may attach to a physical card"}
+	var attached_cards := Array(instance.get("attached_card_ids", [])).duplicate()
+	if action.action_type == RunAction.ATTACH_CARD_UPGRADE:
+		if not attached_cards.is_empty():
+			return {"ok": false, "reason": "A Card Upgrade instance can target only one physical card"}
+		var acquisition := _can_acquire_definition(candidate, definition.definition_id, card_id)
+		if not bool(acquisition.get("ok", false)):
+			return acquisition
+		var existing_on_card := Array(candidate.card_upgrade_attachments.get(card_id, []))
+		for raw_existing_id in existing_on_card:
+			var existing: Dictionary = candidate.modifier_instances.get(String(raw_existing_id), {})
+			if String(existing.get("definition_id", "")) != definition.definition_id:
+				return {"ok": false, "reason": "Different Card Upgrade stacking on one physical card remains a future policy seam"}
+		attached_cards.append(card_id)
+		instance["attached_card_ids"] = attached_cards
+		candidate.modifier_instances[instance_id] = instance
+		var indexed := Array(candidate.card_upgrade_attachments.get(card_id, [])).duplicate()
+		indexed.append(instance_id)
+		candidate.card_upgrade_attachments[card_id] = indexed
+		candidate.last_event = {
+			"kind": "card_upgrade_attached",
+			"instance_id": instance_id,
+			"card_id": card_id,
+			"message": "Card Upgrade attached to the selected physical hanafuda card."
+		}
+	else:
+		if not attached_cards.has(card_id):
+			return {"ok": false, "reason": "Card Upgrade is not attached to that physical card"}
+		attached_cards.erase(card_id)
+		instance["attached_card_ids"] = attached_cards
+		candidate.modifier_instances[instance_id] = instance
+		var indexed := Array(candidate.card_upgrade_attachments.get(card_id, [])).duplicate()
+		indexed.erase(instance_id)
+		if indexed.is_empty():
+			candidate.card_upgrade_attachments.erase(card_id)
+		else:
+			candidate.card_upgrade_attachments[card_id] = indexed
+		candidate.last_event = {
+			"kind": "card_upgrade_detached",
+			"instance_id": instance_id,
+			"card_id": card_id,
+			"message": "Card Upgrade detached from the physical hanafuda card."
+		}
+	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
 func _apply_enter_shop(candidate: RunState, action: RunAction) -> Dictionary:
 	var duplicate_policy := String(action.payload.get("duplicate_policy", ""))
 	if duplicate_policy.is_empty():
 		duplicate_policy = candidate.rules().duplicate_modifier_policy
-	if duplicate_policy.is_empty():
-		return {"ok": false, "reason": "Shop duplicate policy is not configured; Sterling approval BM-B02 is required"}
-	var generated := ShopGenerator.generate(candidate.month, 0, candidate.root_seed, modifier_registry, duplicate_policy)
+	var generated := ShopGenerator.generate(candidate.month, 0, candidate.root_seed, modifier_registry, duplicate_policy, _owned_nonstackable_definition_ids(candidate))
 	if not bool(generated.get("ok", false)):
 		return generated
 	var raw_shop = generated.get("state", {})
@@ -514,11 +677,11 @@ func _apply_buy_offer(candidate: RunState, action: RunAction) -> Dictionary:
 	if candidate.bankroll < offer.price:
 		return {"ok": false, "reason": "Bankroll cannot afford this shop offer"}
 	if _carry_is_full(candidate):
-		return {"ok": false, "reason": "Both carry locations are full; Sterling approval BM-B04 is required"}
+		return {"ok": false, "reason": "Both carry locations are full; create legal carry space before purchasing"}
 	var destination := String(action.payload.get("destination", ""))
 	if destination.is_empty():
 		destination = "active" if candidate.active_count() < candidate.unlocked_active_capacity else "reserve"
-	var placement := _materialize_definition(candidate, offer.definition_id, destination, "shop", offer.offer_id)
+	var placement := _materialize_definition(candidate, offer.definition_id, destination, "shop", offer.offer_id, offer.price)
 	if not bool(placement.get("ok", false)):
 		return placement
 	candidate.bankroll -= offer.price
@@ -537,15 +700,13 @@ func _apply_buy_offer(candidate: RunState, action: RunAction) -> Dictionary:
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
 func _apply_sell_modifier(candidate: RunState, action: RunAction) -> Dictionary:
-	if not liquidation_quote_provider.is_valid():
-		return {"ok": false, "reason": "Resale policy is not configured; Sterling approval BM-B05 is required"}
 	var instance_id := String(action.payload.get("instance_id", ""))
 	if not candidate.modifier_instances.has(instance_id):
 		return {"ok": false, "reason": "Modifier instance is not owned"}
 	var instance: Dictionary = candidate.modifier_instances[instance_id]
 	if not Array(instance.get("attached_card_ids", [])).is_empty():
-		return {"ok": false, "reason": "Selling an attached modifier requires Sterling approval BM-B07/BM-B08"}
-	var proceeds := int(liquidation_quote_provider.call(instance_id, candidate))
+		return {"ok": false, "reason": "An attached modifier must be detached before sale"}
+	var proceeds := ModifierResalePolicy.quote(instance, modifier_registry)
 	if proceeds < 0:
 		return {"ok": false, "reason": "Modifier is not currently saleable"}
 	_remove_modifier(candidate, instance_id)
@@ -570,10 +731,8 @@ func _apply_reroll_shop(candidate: RunState, action: RunAction) -> Dictionary:
 	var duplicate_policy := String(action.payload.get("duplicate_policy", ""))
 	if duplicate_policy.is_empty():
 		duplicate_policy = candidate.rules().duplicate_modifier_policy
-	if duplicate_policy.is_empty():
-		return {"ok": false, "reason": "Shop duplicate policy is not configured; Sterling approval BM-B02 is required"}
 	var next_generation := shop.generation_id + 1
-	var generated := ShopGenerator.generate(candidate.month, next_generation, candidate.root_seed, modifier_registry, duplicate_policy)
+	var generated := ShopGenerator.generate(candidate.month, next_generation, candidate.root_seed, modifier_registry, duplicate_policy, _owned_nonstackable_definition_ids(candidate))
 	if not bool(generated.get("ok", false)):
 		return generated
 	var next_shop := ShopState.from_dict(generated.get("state", {}))
@@ -630,7 +789,7 @@ func _apply_begin_february(candidate: RunState) -> Dictionary:
 	}
 	return {"ok": true, "events": [candidate.last_event.duplicate(true)]}
 
-func _materialize_definition(candidate: RunState, definition_id: String, destination: String, source: String, stable_suffix: String) -> Dictionary:
+func _materialize_definition(candidate: RunState, definition_id: String, destination: String, source: String, stable_suffix: String, purchase_price: int = 0) -> Dictionary:
 	if destination != "active" and destination != "reserve":
 		return {"ok": false, "reason": "Modifier destination is invalid"}
 	if destination == "active" and candidate.active_count() >= candidate.unlocked_active_capacity:
@@ -640,14 +799,10 @@ func _materialize_definition(candidate: RunState, definition_id: String, destina
 	var instance_id := "modifier_%s" % stable_suffix
 	if candidate.modifier_instances.has(instance_id):
 		return {"ok": false, "reason": "Modifier instance ID already exists"}
-	candidate.modifier_instances[instance_id] = {
-		"instance_id": instance_id,
-		"definition_id": definition_id,
-		"location": destination,
-		"source": source,
-		"acquired_month": candidate.month,
-		"attached_card_ids": []
-	}
+	var instance := _new_modifier_instance(candidate, definition_id, destination, source, stable_suffix, purchase_price)
+	if not bool(instance.get("ok", false)):
+		return instance
+	candidate.modifier_instances[instance_id] = instance["instance"]
 	if destination == "active":
 		candidate.active_modifier_ids.append(instance_id)
 	else:

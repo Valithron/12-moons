@@ -43,6 +43,30 @@ func test_each_between_month_phase_is_serializable() -> void:
 		var restored_controller: RunController = restored["controller"]
 		assert_str(restored_controller.state.phase).is_equal(phase)
 
+func test_pending_full_capacity_reward_reloads_without_overflow() -> void:
+	var controller := _controller()
+	controller.state.reserve_capacity = 0
+	controller.state.modifier_instances["existing"] = {"instance_id": "existing", "definition_id": "wider_choice", "location": "active", "source": "shop", "purchase_price": 7, "base_shop_price": 4, "attached_card_ids": []}
+	controller.state.active_modifier_ids = ["existing"]
+	var reward := RewardState.new()
+	reward.generated = true
+	reward.selected_offer_id = "pending_reward"
+	var offer := RewardOffer.new()
+	offer.offer_id = "pending_reward"
+	offer.definition_id = "wider_choice"
+	offer.source = "january_reward"
+	reward.offers = [offer.to_dict()]
+	reward.pending_acquisition = {"offer": offer.to_dict(), "reason": "replace_and_sell_or_refuse"}
+	controller.state.reward_state = reward.to_dict()
+	var data := RunSave.envelope(controller)
+	var restored := RunSave.restore_controller(data)
+	assert_bool(restored.get("ok", false)).is_true()
+	var restored_controller: RunController = restored["controller"]
+	var restored_reward := RewardState.from_dict(restored_controller.state.reward_state)
+	assert_str(restored_reward.selected_offer_id).is_equal("pending_reward")
+	assert_bool(restored_reward.pending_acquisition.is_empty()).is_false()
+	assert_int(restored_controller.state.modifier_instances.size()).is_equal(1)
+
 func test_legacy_save_fixture_migrates_to_v1() -> void:
 	var legacy_payload := {
 		"root_seed": 42,

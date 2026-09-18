@@ -54,4 +54,12 @@ func invariant_errors() -> Array:
 		errors.append("Committed reward selection has no offer ID")
 	if selection_committed and refused and not selected_offer_id.is_empty():
 		errors.append("Refused reward cannot also select an offer")
+	if not pending_acquisition.is_empty():
+		var pending_offer := RewardOffer.from_dict(pending_acquisition.get("offer", {}))
+		if pending_offer.offer_id.is_empty():
+			errors.append("Pending reward acquisition must identify an offer")
+		if selection_committed:
+			errors.append("Pending reward acquisition cannot coexist with committed selection")
+		if selected_offer_id != pending_offer.offer_id:
+			errors.append("Pending reward acquisition must match the selected offer")
 	return errors
