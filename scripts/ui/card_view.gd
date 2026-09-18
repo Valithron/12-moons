@@ -2,6 +2,7 @@ class_name MoonCardView
 extends Button
 
 signal card_clicked(card_id: String)
+signal hover_changed(card: MoonCardView, entered: bool)
 
 var card_id: String = ""
 var definition: CardDefinition = null
@@ -10,6 +11,9 @@ var selectable: bool = false
 var highlighted: bool = false
 var card_texture: Texture2D = null
 var card_size: Vector2 = Vector2(64, 96)
+var slot_position: Vector2 = Vector2.ZERO
+var resting_z_index: int = 0
+var _hovered: bool = false
 
 func _ready() -> void:
 	flat = true
@@ -22,18 +26,48 @@ func _ready() -> void:
 func configure(card_definition: CardDefinition = null, show_face: bool = true, can_select: bool = false, show_highlight: bool = false, requested_size: Vector2 = Vector2(64, 96)) -> void:
 	definition = card_definition
 	card_id = definition.card_id if definition != null else ""
-	face_up = show_face and definition != null
-	selectable = can_select
-	highlighted = show_highlight
+	set_display(requested_size, show_face, can_select, show_highlight)
+	tooltip_text = definition.display_name if definition != null else "Draw pile"
+
+func set_display(requested_size: Vector2, show_face: bool, can_select: bool, show_highlight: bool) -> void:
 	card_size = requested_size
 	custom_minimum_size = card_size
 	size = card_size
-	disabled = not selectable
-	mouse_filter = Control.MOUSE_FILTER_STOP if selectable else Control.MOUSE_FILTER_IGNORE
-	tooltip_text = definition.display_name if definition != null else "Draw pile"
+	pivot_offset = card_size * 0.5
+	highlighted = show_highlight
+	set_selectable(can_select)
+	set_face_up(show_face)
+
+func set_face_up(show_face: bool) -> void:
+	face_up = show_face and definition != null
 	card_texture = null
 	if face_up and definition != null and not definition.art_path.is_empty():
 		card_texture = load(definition.art_path) as Texture2D
+	queue_redraw()
+
+func set_selectable(can_select: bool) -> void:
+	selectable = can_select
+	disabled = not selectable
+	mouse_filter = Control.MOUSE_FILTER_STOP if selectable else Control.MOUSE_FILTER_IGNORE
+	if not selectable:
+		set_hovered(false)
+	queue_redraw()
+
+func set_highlighted(show_highlight: bool) -> void:
+	highlighted = show_highlight
+	queue_redraw()
+
+func set_slot_position(value: Vector2) -> void:
+	slot_position = value
+
+func get_slot_position() -> Vector2:
+	return slot_position
+
+func set_hovered(value: bool) -> void:
+	if _hovered == value:
+		return
+	_hovered = value
+	hover_changed.emit(self, _hovered)
 	queue_redraw()
 
 func _on_pressed() -> void:
@@ -42,9 +76,12 @@ func _on_pressed() -> void:
 
 func _on_mouse_entered() -> void:
 	if selectable:
+		set_hovered(true)
 		queue_redraw()
 
 func _on_mouse_exited() -> void:
+	if _hovered:
+		set_hovered(false)
 	if selectable:
 		queue_redraw()
 

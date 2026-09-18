@@ -11,7 +11,7 @@
       "tags": [
         "bright"
       ],
-      "art_path": "res://assets/cards/Hanafuda_January_Hikari.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/january/crane-sun.webp"
     },
     {
       "id": "m01_pine_january_poetry_ribbon",
@@ -23,7 +23,7 @@
         "poetry_ribbon",
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_January_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/january/poetry-ribbon.webp"
     },
     {
       "id": "m01_pine_january_chaff_a",
@@ -34,7 +34,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_January_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/january/pine-chaff-a.webp"
     },
     {
       "id": "m01_pine_january_chaff_b",
@@ -45,7 +45,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_January_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/january/pine-chaff-b.webp"
     },
     {
       "id": "m02_plum_february_uguisu",
@@ -56,7 +56,7 @@
       "tags": [
         "animal"
       ],
-      "art_path": "res://assets/cards/Hanafuda_February_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/february/warbler.webp"
     },
     {
       "id": "m02_plum_february_poetry_ribbon",
@@ -68,7 +68,7 @@
         "poetry_ribbon",
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_February_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/february/poetry-ribbon.webp"
     },
     {
       "id": "m02_plum_february_chaff_a",
@@ -79,7 +79,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_February_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/february/plum-chaff-a.webp"
     },
     {
       "id": "m02_plum_february_chaff_b",
@@ -90,7 +90,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_February_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/february/plum-chaff-b.webp"
     },
     {
       "id": "m03_cherry_march_curtain",
@@ -102,7 +102,7 @@
         "bright",
         "flower_viewing_piece"
       ],
-      "art_path": "res://assets/cards/Hanafuda_March_Hikari.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/march/cherry-curtain.webp"
     },
     {
       "id": "m03_cherry_march_poetry_ribbon",
@@ -114,7 +114,7 @@
         "poetry_ribbon",
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_March_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/march/poetry-ribbon.webp"
     },
     {
       "id": "m03_cherry_march_chaff_a",
@@ -125,7 +125,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_March_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/march/cherry-chaff-a.webp"
     },
     {
       "id": "m03_cherry_march_chaff_b",
@@ -136,7 +136,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_March_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/march/cherry-chaff-b.webp"
     },
     {
       "id": "m04_wisteria_april_cuckoo",
@@ -147,7 +147,7 @@
       "tags": [
         "animal"
       ],
-      "art_path": "res://assets/cards/Hanafuda_April_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/april/cuckoo.webp"
     },
     {
       "id": "m04_wisteria_april_ribbon",
@@ -158,7 +158,7 @@
       "tags": [
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_April_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/april/red-ribbon.webp"
     },
     {
       "id": "m04_wisteria_april_chaff_a",
@@ -169,7 +169,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_April_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/april/wisteria-chaff-a.webp"
     },
     {
       "id": "m04_wisteria_april_chaff_b",
@@ -180,7 +180,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_April_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/april/wisteria-chaff-b.webp"
     },
     {
       "id": "m05_iris_may_eight_plank_bridge",
@@ -191,7 +191,7 @@
       "tags": [
         "animal"
       ],
-      "art_path": "res://assets/cards/Hanafuda_May_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/may/iris-bridge.webp"
     },
     {
       "id": "m05_iris_may_ribbon",
@@ -202,7 +202,7 @@
       "tags": [
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_May_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/may/red-ribbon.webp"
     },
     {
       "id": "m05_iris_may_chaff_a",
@@ -213,7 +213,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_May_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/may/iris-chaff-a.webp"
     },
     {
       "id": "m05_iris_may_chaff_b",
@@ -224,7 +224,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_May_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/may/iris-chaff-b.webp"
     },
     {
       "id": "m06_peony_june_butterfly",
@@ -236,7 +236,7 @@
         "animal",
         "butterfly"
       ],
-      "art_path": "res://assets/cards/Hanafuda_June_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/june/peony-butterflies.webp"
     },
     {
       "id": "m06_peony_june_blue_ribbon",
@@ -247,7 +247,7 @@
       "tags": [
         "blue_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_June_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/june/blue-ribbon.webp"
     },
     {
       "id": "m06_peony_june_chaff_a",
@@ -258,7 +258,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_June_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/june/peony-chaff-a.webp"
     },
     {
       "id": "m06_peony_june_chaff_b",
@@ -269,7 +269,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_June_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/june/peony-chaff-b.webp"
     },
     {
       "id": "m07_clover_july_boar",
@@ -281,7 +281,7 @@
         "animal",
         "boar"
       ],
-      "art_path": "res://assets/cards/Hanafuda_July_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/july/bush-clover-boar.webp"
     },
     {
       "id": "m07_clover_july_ribbon",
@@ -292,7 +292,7 @@
       "tags": [
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_July_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/july/red-ribbon.webp"
     },
     {
       "id": "m07_clover_july_chaff_a",
@@ -303,7 +303,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_July_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/july/bush-clover-chaff-a.webp"
     },
     {
       "id": "m07_clover_july_chaff_b",
@@ -314,7 +314,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_July_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/july/bush-clover-chaff-b.webp"
     },
     {
       "id": "m08_pampas_august_moon",
@@ -326,7 +326,7 @@
         "bright",
         "moon_viewing_piece"
       ],
-      "art_path": "res://assets/cards/Hanafuda_August_Hikari.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/august/pampas-full-moon.webp"
     },
     {
       "id": "m08_pampas_august_geese",
@@ -337,7 +337,7 @@
       "tags": [
         "animal"
       ],
-      "art_path": "res://assets/cards/Hanafuda_August_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/august/pampas-geese.webp"
     },
     {
       "id": "m08_pampas_august_chaff_a",
@@ -348,7 +348,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_August_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/august/pampas-chaff-a.webp"
     },
     {
       "id": "m08_pampas_august_chaff_b",
@@ -359,7 +359,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_August_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/august/pampas-chaff-b.webp"
     },
     {
       "id": "m09_chrysanthemum_september_sake_cup",
@@ -373,7 +373,7 @@
         "flower_viewing_piece",
         "moon_viewing_piece"
       ],
-      "art_path": "res://assets/cards/Hanafuda_September_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/september/chrysanthemum-sake-cup.webp"
     },
     {
       "id": "m09_chrysanthemum_september_blue_ribbon",
@@ -384,7 +384,7 @@
       "tags": [
         "blue_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_September_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/september/chrysanthemum-blue-ribbon.webp"
     },
     {
       "id": "m09_chrysanthemum_september_chaff_a",
@@ -395,7 +395,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_September_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/september/chrysanthemum-chaff-a.webp"
     },
     {
       "id": "m09_chrysanthemum_september_chaff_b",
@@ -406,7 +406,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_September_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/september/chrysanthemum-chaff-b.webp"
     },
     {
       "id": "m10_maple_october_deer",
@@ -418,7 +418,7 @@
         "animal",
         "deer"
       ],
-      "art_path": "res://assets/cards/Hanafuda_October_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/october/maple-deer.webp"
     },
     {
       "id": "m10_maple_october_blue_ribbon",
@@ -429,7 +429,7 @@
       "tags": [
         "blue_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_October_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/october/maple-blue-ribbon.webp"
     },
     {
       "id": "m10_maple_october_chaff_a",
@@ -440,7 +440,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_October_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/october/maple-chaff-a.webp"
     },
     {
       "id": "m10_maple_october_chaff_b",
@@ -451,7 +451,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_October_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/october/maple-chaff-b.webp"
     },
     {
       "id": "m11_willow_november_rain_man",
@@ -463,7 +463,7 @@
         "bright",
         "rain_bright"
       ],
-      "art_path": "res://assets/cards/Hanafuda_November_Hikari.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/november/willow-rain-man.webp"
     },
     {
       "id": "m11_willow_november_swallow",
@@ -474,7 +474,7 @@
       "tags": [
         "animal"
       ],
-      "art_path": "res://assets/cards/Hanafuda_November_Tane.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/november/willow-swallow.webp"
     },
     {
       "id": "m11_willow_november_lightning_chaff",
@@ -486,7 +486,7 @@
         "chaff",
         "lightning_chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_November_Kasu.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/november/willow-lightning.webp"
     },
     {
       "id": "m11_willow_november_chaff",
@@ -497,7 +497,7 @@
       "tags": [
         "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_November_Tanzaku.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/november/willow-red-ribbon.webp"
     },
     {
       "id": "m12_paulownia_december_phoenix",
@@ -508,7 +508,7 @@
       "tags": [
         "bright"
       ],
-      "art_path": "res://assets/cards/Hanafuda_December_Hikari.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/december/paulownia-phoenix.webp"
     },
     {
       "id": "m12_paulownia_december_chaff_a",
@@ -519,7 +519,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_December_Kasu_1.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/december/paulownia-chaff-a.webp"
     },
     {
       "id": "m12_paulownia_december_chaff_b",
@@ -530,7 +530,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_December_Kasu_2.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/december/paulownia-chaff-b.webp"
     },
     {
       "id": "m12_paulownia_december_chaff_c",
@@ -541,7 +541,7 @@
       "tags": [
         "chaff"
       ],
-      "art_path": "res://assets/cards/Hanafuda_December_Kasu_3.png"
+      "art_path": "res://assets/cards/prototype/thaw/hanafuda/december/paulownia-chaff-c.webp"
     }
   ]
 }

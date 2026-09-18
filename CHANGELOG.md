@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0-prototype.6 — Hanafuda Card Motion
+
+- Add persistent stable-ID `MoonCardView` presentation so cards visibly travel between hands, field, draw resolution, and capture spreads.
+- Add a semantic presentation queue and reusable motion controller for dealing, hand/field/capture reflow, play, draw reveal, card flip, capture slap, yaku feedback, and score-decision timing.
+- Lock card and score input while mandatory presentation is active, and make AI turns wait for presentation completion.
+- Add centralized normal/fast/reduced-motion timing modes and cancellation-safe scene teardown/restart behavior.
+- Document the motion model in `docs/CARD_MOTION.md` and add runtime coverage for the animated UI handoff.
+- January hanafuda rules, deterministic state, scoring, and the Compatibility renderer are unchanged.
+
 ## v0.2.0-prototype.5 — January Table Stabilization
 
 - Correct the standard 48-card manifest's November Willow red-ribbon card and vendor its distinct Tanzaku face art.

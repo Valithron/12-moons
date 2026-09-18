@@ -37,6 +37,9 @@ func _run_flow() -> void:
 	var guard := 0
 	while controller.state.phase != GameState.PHASE_MONTH_COMPLETE and guard < 5000:
 		guard += 1
+		if match_screen.get("presentation_busy"):
+			await process_frame
+			continue
 		if controller.state.current_player == 0:
 			var actions: Array = controller.legal_actions(0)
 			if actions.is_empty():
@@ -58,7 +61,10 @@ func _run_flow() -> void:
 		_fail("January did not reach month complete within the guard limit")
 		return
 
-	await process_frame
+	var transition_guard := 0
+	while boot.get("screen") == match_screen and transition_guard < 240:
+		transition_guard += 1
+		await process_frame
 	var result_screen: Node = boot.get("screen")
 	var play_again_button := _find_button(result_screen, "PLAY AGAIN")
 	if play_again_button == null:
