@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.3.0-prototype.1 — January-to-February Between-Month Milestone
+
+- Complete the authoritative January → settlement/liquidation → reward → carry
+  preparation → six-slot shop → finalization → February placeholder loop.
+- Add deterministic run state, scoped RNG, replay/save continuation, persisted
+  reward/shop offers, capacity-safe carry transactions, and rejection-hash
+  invariants while preserving `GameState`/`MatchController` as January authority.
+- Ship the approved full-pool reward policy, Wider Choice request transformation,
+  Salvage, Rain Check, shared resale rules, and production-safe content validation.
+- Complete the table-first preparation UI with causal settlement/shop feedback,
+  focus restoration, NORMAL/FAST/INSTANT motion, reduced-motion equivalence,
+  cancellation hooks, and an explicit February placeholder transition.
+- Validate the project with Godot 4.7.2: 118/118 GdUnit4 cases across 21 suites,
+  January/core smoke, runtime UI flow, and native 1280×720 plus higher-resolution
+  inspection.
+
 ## v0.2.0-prototype.11 — Between-Month Policy Lock
 
 - Record the five approved between-month policy decisions in the canonical Game Design Authority and synchronize the repository roadmap, implementation plan, and progress ledger.

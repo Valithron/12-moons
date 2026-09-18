@@ -35,7 +35,8 @@ func _show_title() -> void:
 	start.add_theme_font_size_override("font_size", 22)
 	start.pressed.connect(_show_january_intro)
 	root.add_child(start)
-	_add_label(root, "Prototype 0.2.0-prototype.9", Vector2(0, 646), Vector2(1280, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
+	var version := String(ProjectSettings.get_setting("application/config/version", "unknown"))
+	_add_label(root, "Prototype %s" % version, Vector2(0, 646), Vector2(1280, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
 
 func _show_january_intro() -> void:
 	_clear_screen()

@@ -1,8 +1,9 @@
 # 12 Moons
 
-12 Moons is a deterministic hanafuda roguelike built in GDScript. The first
-playable prototype is a complete January month against a rudimentary legal AI,
-using the standard 48-card deck and recognizable Koi-Koi matching.
+12 Moons is a deterministic hanafuda roguelike built in GDScript. The current
+prototype contains a complete January month against a rudimentary legal AI and
+the January-to-February between-month loop, using the standard 48-card deck and
+recognizable Koi-Koi matching.
 
 ## Development
 
@@ -29,8 +30,10 @@ The January slice includes:
 - Licensed Louie Mantia hanafuda face art mapped to all 48 stable card IDs.
 - Deterministic replay and state-hash validation with strict card conservation.
 
-Rewards, shops, carry builds, later Moons, multiplayer, and final presentation
-remain outside this prototype milestone.
+February gameplay and later Moons, multiplayer, and final authored catalogue
+content remain outside this prototype milestone. The between-month slice now
+includes settlement/liquidation, carry capacity, persisted rewards, a six-slot
+shop, finalization, and the February placeholder transition.
 
 ## Architecture
 

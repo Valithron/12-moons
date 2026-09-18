@@ -18,33 +18,38 @@ production infrastructure required by the implementation plan.
 
 - Branch: `main`
 - Starting synchronized policy baseline commit: `7a4f9436cf749b54d43363a9098c26089c06d712`
-- Current committed implementation checkpoint: `88548a0`
-- `VERSION`: `0.2.0-prototype.11`
-- `project.godot` version: `0.2.0-prototype.11`
+- Current committed implementation checkpoint: `88548a0` (release synchronization is the current working checkpoint)
+- `VERSION`: `0.3.0-prototype.1`
+- `project.godot` version: `0.3.0-prototype.1`
 - Current implementation: deterministic January month, legal public-information
   AI, yaku/scoring, Stop/Koi-Koi, stable card presentation, motion queue, run
   authority, settlement/liquidation hooks, modifier/carry ownership, reward
   generation, six-slot shop transactions, save/migration, debug scenarios, and
   the initial between-month presentation shell. BM-B01 through BM-B05 are now
   wired as production defaults and BM-B06 is not applicable. Remaining
-  acceptance work is exact-engine/native visual validation; no unresolved
-  modifier seam is being activated.
+  acceptance work is now release synchronization and final hardening; no
+  unresolved modifier seam is being activated.
 - Required validation:
   `scripts/run/validate_project.ps1 -GodotBinary <discovered Godot 4.7.2 binary>`
 - Baseline validation status: PASS under exact Godot 4.7.2; native visual
-  acceptance remains a human/environment check.
+  acceptance is complete at 1280×720 and in a maximized higher-resolution
+  inspection with no clipping, overlap, or transition deadlock observed.
 - Authority status: root `AGENTS.md` is present on merged `main`. The continuation objective and merged repository authority notes record BM-B01 through BM-B05 as approved; BM-B06 is no longer applicable because full-pool rewards were chosen. The authenticated canonical **12 Moons — Game Design Authority** was read during the 2026-09-18 continuation audit. It confirms the approved full-pool reward/carry/shop/resale rules and the approved modifier catalogue; unresolved execution details remain recorded in the blocker register and no additional rule is inferred.
 
 ## Current acceptance blockers
 
 - `ENV-BM-01` — RESOLVED by downloading the official Godot 4.7.2 standard
-  Windows archive; the exact project validator now passes.
-- `UX-BM-01` — native CUA inspection did not expose an interactive Godot/native
-  surface, so visual acceptance remains a human/environment check.
+  Windows archive; the exact project validator passes.
+- `UX-BM-01` — RESOLVED by native Godot 4.7.2 inspection of the full flow at
+  1280×720 and a maximized higher-resolution window, including focus-visible
+  reroll feedback and the February placeholder.
 - `CONTENT-BM-01` — RESOLVED by the validated addition of the two canonical
   non-seam service definitions (`salvage` and `rain_check`). The production
   registry now contains three eligible definitions and fresh whole-pool reward
   generation produces three persisted offers without promoting seam entries.
+- Current acceptance blockers: none for the approved milestone scope. BM-B07
+  through BM-B11 remain documented future design blockers, and BM-B12 remains
+  non-blocking, as required by the authority register.
 
 ## Milestone table
 
@@ -64,11 +69,11 @@ production infrastructure required by the implementation plan.
 | BM-11 | Debug scenarios and inspection | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 2 targeted cases | 317d11b | — | All required fixtures are deterministic and production-invariant-valid. |
 | BM-12 | Six-slot ShopState/generation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, shop generation cases | 317d11b | BM-B02/BM-B07 for final authored inventory | Six categories persist; unavailable categories remain explicit rather than invented. |
 | BM-13 | Shop transactions | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, atomic full-storage rejection, purchase-price/free-reward resale, reroll, Salvage, and Rain Check cases | 787a6a4 | — | Full storage blocks purchase without consuming currency/offer; sale and Salvage use explicit shared economy rules; preserved offers persist and return in the next generated month slot. |
-| BM-14 | Presentation and January UX foundation | IN PROGRESS | 2026-09-18 | — | PASS, 3 presentation cases plus 9 card-motion cases | 851ae10 | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; all tested motion modes converge on the same card state; full visual acceptance remains. |
-| BM-15 | Preparation shell, settlement/reward/carry UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Shared shell presents authoritative liquidation, replacement/refusal, Salvage, and carry actions; native visual acceptance remains. |
-| BM-16 | Shop/finalization UI | IN PROGRESS | 2026-09-18 | — | PASS, 8/8 between-month UI cases under Godot 4.7.1 | 787a6a4 | UX-BM-01 | Six category slots, sale, buy rejection, reroll, Rain Check preservation, and finalization controls are wired; unavailable content stays explicit. |
+| BM-14 | Presentation and January UX foundation | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 3 presentation cases plus 9 card-motion cases; native exact-engine table inspection | 851ae10 | — | Motion profile, cancellation hooks, focusable cards, semantic audio hooks, and decision tray are present; NORMAL/FAST/INSTANT/REDUCED converge and native inspection found no clipping or deadlock. |
+| BM-15 | Preparation shell, settlement/reward/carry UI | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 8/8 between-month UI cases plus native exact-engine flow | 787a6a4 | — | Shared shell presents authoritative settlement, reward generation/selection, replacement/refusal, Salvage, and carry actions; native inspection confirmed causal copy and reward-to-carry continuity. |
+| BM-16 | Shop/finalization UI | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, 8/8 between-month UI cases plus native exact-engine flow | 787a6a4 | — | Six category slots, sale, buy rejection, two rerolls, no third reroll, Rain Check preservation, and finalization controls were exercised; unavailable content stays explicit. |
 | BM-17 | February transition placeholder | COMPLETE | 2026-09-18 | 2026-09-18 | PASS, month-boundary and profile cases | 317d11b | — | `BEGIN_FEBRUARY` reaches explicit Snow Moon placeholder without February rules. |
-| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2 | 88548a0 | UX-BM-01 | Approved policy implementation and authored minimum reward content are green under the exact engine; native visual acceptance remains. |
+| BM-18 | Final hardening and release gate | IN PROGRESS | 2026-09-18 | — | PASS, 118/118 across 21 suites plus full validator PASS under exact Godot 4.7.2; native flow PASS | 88548a0 | — | Approved policy implementation, authored minimum reward content, exact-engine validation, and native visual acceptance are green; final release synchronization and architecture review remain. |
 
 ## Design blocker register
 
@@ -145,12 +150,13 @@ Append-only entries in the format:
 - 2026-09-18 — full GdUnit4 checkpoint — `addons/gdUnit4/runtest.cmd --godot_binary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe -a res://tests --ignoreHeadlessMode` — PASS (provisional Godot 4.7.1) — 118/118 cases across 21 suites; no errors, failures, flaky, skipped, or orphaned cases — bd8626a
 - 2026-09-18 — full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.1-stable_win64.exe\Godot_v4.7.1-stable_win64_console.exe` — PASS (provisional Godot 4.7.1) — January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — e579508
 - 2026-09-18 — exact-engine full project validation checkpoint — `scripts/run/validate_project.ps1 -GodotBinary C:\Users\valtu\Downloads\Godot_v4.7.2-stable_win64\Godot_v4.7.2-stable_win64_console.exe` — PASS — Godot 4.7.2 January/core smoke, runtime UI flow, headless validation, and 118/118 GdUnit4 cases; no authored-content warning; generated `.import` metadata restored — working tree
+- 2026-09-18 — BM-14/BM-15/BM-16 native acceptance checkpoint — exact Godot 4.7.2 editor/runtime inspection — PASS — at 1280×720, exercised January intro, card play, Stop/Koi-Koi decision tray, result, settlement, reward generation/selection, carry, purchase, sale, first and second rerolls, rejected third reroll, Rain Check preservation, finalize, Begin February; maximized higher-resolution inspection showed centered letterboxing without overlap or clipping — working tree
 
 ## Known deferred work
 
 - February gameplay and later Moon rules.
-- Full modifier catalogue and unresolved modifier behavior.
-- Remaining full modifier catalogue content and unresolved modifier behavior; the three approved non-seam definitions required for this milestone are now present.
+- Full modifier catalogue and unresolved modifier behavior; the three approved
+  non-seam definitions required for this milestone are now present.
 - Multiplayer, networking, cloud saves, and production telemetry.
 - Generic ability/event frameworks, ECS, database, generic inventory, or second
   rules engine.
@@ -175,6 +181,8 @@ Append-only entries in the format:
   speed modes, cancellation, and presentation convergence are verified.
 - Compatibility-renderer profiling and 720p/higher-resolution inspection pass.
 - Full repository validation passes with the discovered Godot 4.7.2 binary.
+- `VERSION`, `project.godot`, title version display, `README.md`, and the
+  player-facing changelog are synchronized for the completed milestone.
 - Production modifier content supplies enough authored eligible definitions for the approved persisted three-offer reward pool; no deferred seam is used as filler.
 - All current design blockers are resolved or the milestone is explicitly
   stopped with the blocker recorded; no unresolved rule is invented.
