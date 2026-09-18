@@ -15,7 +15,8 @@ func _build(result: Dictionary) -> void:
 
 	var background := ColorRect.new()
 	background.color = Color(0.07, 0.11, 0.16)
-	background.size = Vector2(960, 540)
+	background.size = Vector2(1280, 720)
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 
 	var winner_id := int(result.get("winner_id", -1))
@@ -24,31 +25,31 @@ func _build(result: Dictionary) -> void:
 		outcome = "PLAYER WINS"
 	elif winner_id == 1:
 		outcome = "HOUSE WINS"
-	_add_label("JANUARY COMPLETE", Vector2(0, 30), Vector2(960, 44), 28, Color(0.95, 0.84, 0.56), HORIZONTAL_ALIGNMENT_CENTER)
-	_add_label(outcome, Vector2(0, 76), Vector2(960, 46), 34, Color(0.95, 0.94, 0.86), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label("JANUARY COMPLETE", Vector2(0, 58), Vector2(1280, 44), 32, Color(0.95, 0.84, 0.56), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(outcome, Vector2(0, 108), Vector2(1280, 46), 38, Color(0.95, 0.94, 0.86), HORIZONTAL_ALIGNMENT_CENTER)
 
 	var ended_by := String(result.get("ended_by", "exhaustion"))
 	var end_text := "Ended by " + ("Stop" if ended_by == "stop" else "normal exhaustion")
 	if bool(result.get("koi_koi_declared", false)):
 		end_text += " • Koi-Koi was declared"
-	_add_label(end_text, Vector2(0, 120), Vector2(960, 28), 16, Color(0.70, 0.78, 0.84), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(end_text, Vector2(0, 158), Vector2(1280, 28), 17, Color(0.70, 0.78, 0.84), HORIZONTAL_ALIGNMENT_CENTER)
 
 	var player_scores: Array = Array(result.get("player_scores", []))
 	if player_scores.size() >= 2:
-		_add_score_panel("PLAYER", player_scores[0], Vector2(68, 175))
-		_add_score_panel("HOUSE", player_scores[1], Vector2(510, 175))
+		_add_score_panel("PLAYER", player_scores[0], Vector2(188, 218))
+		_add_score_panel("HOUSE", player_scores[1], Vector2(710, 218))
 
 	var play_again := Button.new()
 	play_again.text = "PLAY AGAIN"
-	play_again.position = Vector2(270, 465)
-	play_again.size = Vector2(190, 48)
+	play_again.position = Vector2(470, 630)
+	play_again.size = Vector2(160, 52)
 	play_again.pressed.connect(_on_play_again)
 	add_child(play_again)
 
 	var return_title := Button.new()
 	return_title.text = "RETURN TO TITLE"
-	return_title.position = Vector2(500, 465)
-	return_title.size = Vector2(190, 48)
+	return_title.position = Vector2(650, 630)
+	return_title.size = Vector2(160, 52)
 	return_title.pressed.connect(_on_return_title)
 	add_child(return_title)
 
@@ -56,7 +57,8 @@ func _add_score_panel(title: String, score: Dictionary, position_value: Vector2)
 	var panel := ColorRect.new()
 	panel.color = Color(0.12, 0.18, 0.25)
 	panel.position = position_value
-	panel.size = Vector2(382, 260)
+	panel.size = Vector2(382, 350)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	_add_label_to(panel, title, Vector2(0, 12), Vector2(382, 30), 22, Color(0.95, 0.84, 0.56), HORIZONTAL_ALIGNMENT_CENTER)
 	var yaku_lines: Array = []
@@ -72,7 +74,7 @@ func _add_score_panel(title: String, score: Dictionary, position_value: Vector2)
 	body += "\n7+ multiplier: x%d" % int(score.get("seven_plus_multiplier", 1))
 	body += "\nKoi-Koi multiplier: x%d" % int(score.get("koi_koi_multiplier", 1))
 	body += "\nFINAL: %d" % int(score.get("final_score", 0))
-	_add_label_to(panel, body, Vector2(18, 50), Vector2(346, 198), 15, Color(0.91, 0.90, 0.82), HORIZONTAL_ALIGNMENT_LEFT)
+	_add_label_to(panel, body, Vector2(18, 50), Vector2(346, 282), 15, Color(0.91, 0.90, 0.82), HORIZONTAL_ALIGNMENT_LEFT)
 
 func _on_play_again() -> void:
 	play_again_pressed.emit()
@@ -89,6 +91,7 @@ func _add_label(value: String, position_value: Vector2, size_value: Vector2, fon
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(label)
 
 func _add_label_to(parent: Node, value: String, position_value: Vector2, size_value: Vector2, font_size: int, color: Color, alignment: int) -> void:
@@ -101,4 +104,5 @@ func _add_label_to(parent: Node, value: String, position_value: Vector2, size_va
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", color)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	parent.add_child(label)

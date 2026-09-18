@@ -190,6 +190,7 @@ func test_score_decision_is_after_draw_and_stop_ends_the_month() -> void:
 	assert_int(controller.state.deck.draw_index).is_equal(nine_chaff.size() + 5)
 	assert_bool(controller.state.pending_card_id.is_empty()).is_true()
 	assert_str(controller.state.last_event.get("kind", "")).is_equal("score_decision")
+	assert_str(controller.state.last_event.get("draw_card_id", "")).is_equal("m06_peony_june_chaff_b")
 	assert_bool(controller.submit_action(GameAction.new(GameAction.STOP, 0)).accepted).is_true()
 	assert_str(controller.state.phase).is_equal(GameState.PHASE_MONTH_COMPLETE)
 	assert_str(controller.state.terminal_result.get("ended_by", "")).is_equal("stop")

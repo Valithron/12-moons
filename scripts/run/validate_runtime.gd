@@ -60,6 +60,10 @@ func _run_flow() -> void:
 
 	await process_frame
 	var result_screen: Node = boot.get("screen")
+	var play_again_button := _find_button(result_screen, "PLAY AGAIN")
+	if play_again_button == null:
+		_fail("January result did not expose PLAY AGAIN")
+		return
 	var return_button := _find_button(result_screen, "RETURN TO TITLE")
 	if return_button == null:
 		_fail("January completed without showing the result screen")
@@ -70,7 +74,7 @@ func _run_flow() -> void:
 		_fail("result screen did not return to the title screen")
 		return
 
-	print("12 Moons UI flow validation passed: title -> intro -> January -> result -> title")
+	print("12 Moons UI flow validation passed: title -> intro -> January -> result -> replay/title controls")
 	boot.queue_free()
 	quit(0)
 

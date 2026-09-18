@@ -492,12 +492,12 @@
       "id": "m11_willow_november_chaff",
       "month": 11,
       "flower": "willow",
-      "base_class": "chaff",
-      "display_name": "Willow Chaff",
+      "base_class": "ribbon",
+      "display_name": "Willow Red Ribbon",
       "tags": [
-        "chaff"
+        "red_ribbon"
       ],
-      "art_path": "res://assets/cards/Hanafuda_November_Kasu.png"
+      "art_path": "res://assets/cards/Hanafuda_November_Tanzaku.png"
     },
     {
       "id": "m12_paulownia_december_phoenix",

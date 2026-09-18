@@ -63,3 +63,45 @@ func validate_art_assets() -> Array:
 		elif not FileAccess.file_exists(definition.art_path):
 			errors.append("Card art is missing: %s -> %s" % [card_id, definition.art_path])
 	return errors
+
+func validate_manifest() -> Array:
+	var errors: Array = []
+	var card_ids := ids()
+	if card_ids.size() != 48:
+		errors.append("Expected 48 cards, got %d" % card_ids.size())
+	if _by_month.size() != 12:
+		errors.append("Expected 12 months, got %d" % _by_month.size())
+	for month in range(1, 13):
+		var month_cards := cards_for_month(month)
+		if month_cards.size() != 4:
+			errors.append("Month %d has %d cards, expected 4" % [month, month_cards.size()])
+		for card_id in month_cards:
+			var definition := get_card(String(card_id))
+			if definition == null:
+				errors.append("Month %d references missing card: %s" % [month, card_id])
+			elif definition.month != month:
+				errors.append("Card %s has month %d but is indexed under month %d" % [card_id, definition.month, month])
+	var allowed_classes := ["bright", "animal", "ribbon", "chaff"]
+	for card_id in card_ids:
+		var definition := get_card(String(card_id))
+		if definition == null:
+			continue
+		if not allowed_classes.has(definition.base_class):
+			errors.append("Card %s has invalid class: %s" % [card_id, definition.base_class])
+	return errors
+
+func duplicate_art_mappings() -> Array:
+	var by_art: Dictionary = {}
+	for card_id in ids():
+		var definition := get_card(String(card_id))
+		if definition == null or definition.art_path.is_empty():
+			continue
+		if not by_art.has(definition.art_path):
+			by_art[definition.art_path] = []
+		by_art[definition.art_path].append(String(card_id))
+	var duplicates: Array = []
+	for art_path in by_art.keys():
+		var mapped_ids: Array = by_art[art_path]
+		if mapped_ids.size() > 1:
+			duplicates.append("%s -> %s" % [art_path, ", ".join(mapped_ids)])
+	return duplicates

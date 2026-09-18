@@ -265,6 +265,7 @@ func _finish_turn(candidate: GameState) -> void:
 	var actor := candidate.player(candidate.current_player)
 	if actor == null:
 		return
+	var resolution_event: Dictionary = candidate.last_event.duplicate(true)
 	var score := YakuEvaluator.evaluate(actor.captured_ids, catalog, candidate.moon_id)
 	var previous: Dictionary = candidate.previous_score_snapshots[candidate.current_player]
 	var can_continue := _can_continue(candidate)
@@ -273,7 +274,9 @@ func _finish_turn(candidate: GameState) -> void:
 		candidate.last_event = {
 			"kind": "score_decision",
 			"message": "Your yaku improved. Stop or Koi-Koi?",
-			"score": score.duplicate(true)
+			"score": score.duplicate(true),
+			"draw_card_id": String(resolution_event.get("card_id", "")) if String(resolution_event.get("source", "")) == "draw" else "",
+			"draw_captured_ids": Array(resolution_event.get("captured_ids", [])).duplicate()
 		}
 		return
 	candidate.previous_score_snapshots[candidate.current_player] = score.duplicate(true)

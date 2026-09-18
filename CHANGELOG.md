@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.2.0-prototype.5 — January Table Stabilization
+
+- Correct the standard 48-card manifest's November Willow red-ribbon card and vendor its distinct Tanzaku face art.
+- Add manifest checks for 48 unique cards, twelve four-card months, valid classes, complete art assets, and unintended duplicate art mappings.
+- Replace the 960 × 540 positional table with a 1280 × 720 named-region layout for hands, captures, field, draw/resolution, scores, status, and modal decisions.
+- Keep capture groups readable, separate the draw pile from the revealed resolution card, and make selectable/hovered cards visually explicit.
+- Slow house turns with short presentation pauses and describe played, captured, drawn, Stop, and Koi-Koi actions in the table status.
+- Expand the title, January intro, and result screens to the shared 16:9 virtual surface.
+- Add baseline table-region layout coverage alongside the existing full January UI-flow validation.
+
 ## v0.2.0-prototype.4 — Starter Card Input Fix
 
 - Stop the empty full-screen UI layers from intercepting clicks on playable cards.

@@ -11,11 +11,9 @@
   CC BY-SA 4.0 by Louie Mantia, sourced from Wikimedia/Wikipedia.
 
 12 Moons copied only the manifest-referenced PNG card-face assets. The upstream
-GPL game code and Godot `.import` files were not copied. The source asset set
-provides one November Kasu face, so that texture is intentionally mapped to
-both November Chaff physical cards in the current canonical manifest. The
-source November Tanzaku image is not vendored because it has no corresponding
-12 Moons card ID.
+GPL game code and Godot `.import` files were not copied. The November Tanzaku
+face is vendored for the Willow red-ribbon card; it is distinct from the
+November Kasu face used by the two chaff pieces.
 
 The mapping from stable card IDs to textures is data-driven in
 `data/hanafuda/cards.json`. This directory is provenance and licensing

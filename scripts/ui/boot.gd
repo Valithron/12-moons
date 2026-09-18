@@ -17,25 +17,25 @@ func _clear_screen() -> void:
 func _show_title() -> void:
 	_clear_screen()
 	var root := Control.new()
-	root.size = Vector2(960, 540)
+	root.size = Vector2(1280, 720)
 	add_child(root)
 	screen = root
 
 	var background := ColorRect.new()
 	background.color = Color(0.07, 0.11, 0.16)
-	background.size = Vector2(960, 540)
+	background.size = Vector2(1280, 720)
 	root.add_child(background)
-	_add_label(root, "12 MOONS", Vector2(0, 120), Vector2(960, 66), 48, Color(0.95, 0.84, 0.56), HORIZONTAL_ALIGNMENT_CENTER)
-	_add_label(root, "A hanafuda game of risk, yaku, and changing moons.", Vector2(0, 194), Vector2(960, 34), 18, Color(0.78, 0.82, 0.83), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(root, "12 MOONS", Vector2(0, 170), Vector2(1280, 66), 56, Color(0.95, 0.84, 0.56), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(root, "A hanafuda game of risk, yaku, and changing moons.", Vector2(0, 246), Vector2(1280, 34), 20, Color(0.78, 0.82, 0.83), HORIZONTAL_ALIGNMENT_CENTER)
 
 	var start := Button.new()
 	start.text = "START JANUARY"
-	start.position = Vector2(360, 310)
-	start.size = Vector2(240, 62)
+	start.position = Vector2(500, 390)
+	start.size = Vector2(280, 68)
 	start.add_theme_font_size_override("font_size", 22)
 	start.pressed.connect(_show_january_intro)
 	root.add_child(start)
-	_add_label(root, "Prototype 0.2.0-prototype.4", Vector2(0, 470), Vector2(960, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
+	_add_label(root, "Prototype 0.2.0-prototype.5", Vector2(0, 646), Vector2(1280, 24), 14, Color(0.58, 0.66, 0.71), HORIZONTAL_ALIGNMENT_CENTER)
 
 func _show_january_intro() -> void:
 	_clear_screen()

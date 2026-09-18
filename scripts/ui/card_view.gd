@@ -16,6 +16,8 @@ func _ready() -> void:
 	focus_mode = Control.FOCUS_NONE
 	mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	pressed.connect(_on_pressed)
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(_on_mouse_exited)
 
 func configure(card_definition: CardDefinition = null, show_face: bool = true, can_select: bool = false, show_highlight: bool = false, requested_size: Vector2 = Vector2(64, 96)) -> void:
 	definition = card_definition
@@ -27,6 +29,7 @@ func configure(card_definition: CardDefinition = null, show_face: bool = true, c
 	custom_minimum_size = card_size
 	size = card_size
 	disabled = not selectable
+	mouse_filter = Control.MOUSE_FILTER_STOP if selectable else Control.MOUSE_FILTER_IGNORE
 	tooltip_text = definition.display_name if definition != null else "Draw pile"
 	card_texture = null
 	if face_up and definition != null and not definition.art_path.is_empty():
@@ -36,6 +39,14 @@ func configure(card_definition: CardDefinition = null, show_face: bool = true, c
 func _on_pressed() -> void:
 	if selectable and not card_id.is_empty():
 		card_clicked.emit(card_id)
+
+func _on_mouse_entered() -> void:
+	if selectable:
+		queue_redraw()
+
+func _on_mouse_exited() -> void:
+	if selectable:
+		queue_redraw()
 
 func _draw() -> void:
 	var bounds := Rect2(Vector2.ZERO, size)
@@ -55,4 +66,7 @@ func _draw() -> void:
 	if highlighted:
 		border_color = Color(1.0, 0.82, 0.22)
 		border_width = 4.0
+	elif selectable and is_hovered():
+		border_color = Color(0.72, 0.93, 1.0)
+		border_width = 3.0
 	draw_rect(bounds.grow(-1), border_color, false, border_width)

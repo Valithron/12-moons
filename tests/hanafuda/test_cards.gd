@@ -5,6 +5,7 @@ func _catalog() -> CardCatalog:
 
 func test_manifest_has_48_unique_physical_cards() -> void:
 	var catalog := _catalog()
+	assert_array(catalog.validate_manifest()).is_empty()
 	var ids := catalog.ids()
 	assert_int(ids.size()).is_equal(48)
 	var unique_ids: Dictionary = {}
@@ -50,7 +51,19 @@ func test_five_brights_and_special_named_pieces_are_identifiable() -> void:
 func test_every_physical_card_resolves_to_face_art() -> void:
 	var catalog := _catalog()
 	assert_array(catalog.validate_art_assets()).is_empty()
+	assert_array(catalog.duplicate_art_mappings()).is_empty()
 	for card_id in catalog.ids():
 		var definition := catalog.get_card(String(card_id))
 		assert_bool(definition.art_path.begins_with("res://assets/cards/")).is_true()
 		assert_bool(FileAccess.file_exists(definition.art_path)).is_true()
+
+func test_november_has_a_red_ribbon_and_distinct_face_art() -> void:
+	var catalog := _catalog()
+	var november := catalog.cards_for_month(11)
+	assert_int(november.size()).is_equal(4)
+	var ribbon := catalog.get_card("m11_willow_november_chaff")
+	assert_str(ribbon.base_class).is_equal("ribbon")
+	assert_bool(ribbon.has_tag("red_ribbon")).is_true()
+	assert_str(ribbon.art_path).is_equal("res://assets/cards/Hanafuda_November_Tanzaku.png")
+	assert_bool(FileAccess.file_exists(ribbon.art_path)).is_true()
+	assert_str(catalog.get_card("m11_willow_november_lightning_chaff").art_path).is_not_equal(ribbon.art_path)

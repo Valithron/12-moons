@@ -63,3 +63,53 @@ func test_visual_movement_does_not_mutate_authoritative_state() -> void:
 	card_node.position = Vector2(240, 120)
 	assert_str(state.state_hash()).is_equal(before_hash)
 	card_node.free()
+
+func test_table_layout_regions_fit_without_baseline_overlap() -> void:
+	var layout_script = preload("res://scripts/ui/table_layout.gd")
+	var layout = layout_script.new()
+	var root := Control.new()
+	root.size = layout_script.VIEW_SIZE
+	layout.build(root)
+	var rects: Dictionary = layout_script.REGION_RECTS
+	for region_name in rects.keys():
+		var rect: Rect2 = rects[region_name]
+		assert_bool(rect.position.x >= 0.0 and rect.position.y >= 0.0).is_true()
+		assert_bool(rect.end.x <= layout_script.VIEW_SIZE.x and rect.end.y <= layout_script.VIEW_SIZE.y).is_true()
+	var names := rects.keys()
+	for first_index in range(names.size()):
+		for second_index in range(first_index + 1, names.size()):
+			var first_name: String = names[first_index]
+			var second_name: String = names[second_index]
+			assert_bool(not (rects[first_name] as Rect2).intersects(rects[second_name] as Rect2)).is_true()
+	root.free()
+
+func test_score_decision_overlay_is_modal() -> void:
+	var match_scene := load("res://scenes/match/match.tscn")
+	var match_screen: Control = match_scene.instantiate()
+	var controller := MatchController.new(77, CardCatalog.new())
+	controller.state.phase = GameState.PHASE_SCORE_DECISION
+	controller.state.current_player = 0
+	match_screen.configure(controller)
+	add_child(match_screen)
+	await get_tree().process_frame
+	var overlay: Control = match_screen.get("overlay_layer")
+	assert_int(overlay.get_child_count()).is_equal(2)
+	assert_int(overlay.get_child(0).mouse_filter).is_equal(Control.MOUSE_FILTER_STOP)
+	assert_int(overlay.get_child(1).mouse_filter).is_equal(Control.MOUSE_FILTER_STOP)
+	var panel: Control = overlay.get_child(1)
+	var stop_button := _find_button(panel, "STOP")
+	var koi_button := _find_button(panel, "KOI-KOI")
+	assert_object(stop_button).is_not_null()
+	assert_object(koi_button).is_not_null()
+	match_screen.queue_free()
+
+func _find_button(node: Node, target_text: String) -> Button:
+	if node == null:
+		return null
+	for child in node.get_children():
+		if child is Button and child.text == target_text:
+			return child
+		var nested: Button = _find_button(child, target_text)
+		if nested != null:
+			return nested
+	return null
